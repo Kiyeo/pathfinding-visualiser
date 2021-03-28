@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Node from "./Node/Node.jsx";
 import {
   getNodesInShortestPathOrder,
@@ -12,10 +12,11 @@ const FINISH_NODE_COL = 35;
 
 export default function Grid() {
   const [grid, setGrid] = useState([]);
+  const nodeRefArray = useRef([]);
 
   useEffect(() => {
     const grid = [];
-    for (let row = 0; row < 15; row++) {
+    for (let row = 0; row < 20; row++) {
       const currentRow = [];
       for (let col = 0; col < 50; col++) {
         currentRow.push(createNode(row, col));
@@ -35,8 +36,10 @@ export default function Grid() {
       }
       setTimeout(() => {
         const node = visitedNodesInOrder[i];
-        document.getElementById(`node-${node.row}-${node.col}`).className =
+        nodeRefArray.current[`${node.row}-${node.col}`].className =
           "node node-visited";
+        //document.getElementById(`node-${node.row}-${node.col}`).className =
+        //  "node node-visited";
       }, 10 * i);
     }
   };
@@ -45,15 +48,17 @@ export default function Grid() {
     for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
       setTimeout(() => {
         const node = nodesInShortestPathOrder[i];
-        document.getElementById(`node-${node.row}-${node.col}`).className =
+        nodeRefArray.current[`${node.row}-${node.col}`].className =
           "node node-shortest-path";
+        //document.getElementById(`node-${node.row}-${node.col}`).className =
+        //  "node node-shortest-path";
       }, 50 * i);
     }
   };
 
   const visualiseDijkstra = () => {
     const startNode = grid[START_NODE_ROW][START_NODE_COL];
-    const finishNode = grid[FINISH_NODE_ROW][START_NODE_COL];
+    const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
     const visitedNodeOrder = dijkstra(grid, startNode, finishNode);
     const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
     animateDijkstra(visitedNodeOrder, nodesInShortestPathOrder);
@@ -85,6 +90,7 @@ export default function Grid() {
                 return (
                   <Node
                     key={nodeId}
+                    ref={(el) => (nodeRefArray.current[`${row}-${col}`] = el)}
                     row={row}
                     col={col}
                     isStart={isStart}

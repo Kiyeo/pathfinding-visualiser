@@ -1,10 +1,14 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import "./Node.css";
 
-export default function Node(props) {
+export default forwardRef((props, ref) => {
   const { row, col, isStart, isFinish } = props;
   const extraClassName = isFinish ? "node-finish" : isStart ? "node-start" : "";
   return (
-    <div id={`node-${row}-${col}`} className={`node ${extraClassName}`}></div>
+    <div
+      id={`node-${row}-${col}`}
+      ref={ref}
+      className={`node ${extraClassName}`}
+    ></div>
   );
-}
+});
