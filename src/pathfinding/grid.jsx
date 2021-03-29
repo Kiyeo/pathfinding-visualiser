@@ -7,12 +7,15 @@ import {
 
 const START_NODE_ROW = 10;
 const START_NODE_COL = 15;
-const FINISH_NODE_ROW = 10;
+const FINISH_NODE_ROW = 5;
 const FINISH_NODE_COL = 35;
 
 export default function Grid() {
   const [grid, setGrid] = useState([]);
+  const [isVisualising, setIsVisualising] = useState(false);
+  const visitedNodeOrder = useRef([])
   const nodeRefArray = useRef([]);
+
 
   useEffect(() => {
     const grid = [];
@@ -26,21 +29,20 @@ export default function Grid() {
     setGrid(grid);
   }, []);
 
-  const animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {
-    for (let i = 0; i <= visitedNodesInOrder.length; i++) {
-      if (i === visitedNodesInOrder.length) {
+
+  const animateDijkstra = (visitedNodeOrder, nodesInShortestPathOrder) => {
+    for (let i = 0; i <= visitedNodeOrder.length; i++) {
+      if (i === visitedNodeOrder.length) {
         setTimeout(() => {
           animateShortestPath(nodesInShortestPathOrder);
-        }, 10 * i);
+        }, 5 * i);
         return;
       }
       setTimeout(() => {
-        const node = visitedNodesInOrder[i];
+        const node = visitedNodeOrder[i];
         nodeRefArray.current[`${node.row}-${node.col}`].className =
           "node node-visited";
-        //document.getElementById(`node-${node.row}-${node.col}`).className =
-        //  "node node-visited";
-      }, 10 * i);
+      }, 5 * i);
     }
   };
 
@@ -50,24 +52,26 @@ export default function Grid() {
         const node = nodesInShortestPathOrder[i];
         nodeRefArray.current[`${node.row}-${node.col}`].className =
           "node node-shortest-path";
-        //document.getElementById(`node-${node.row}-${node.col}`).className =
-        //  "node node-shortest-path";
       }, 50 * i);
     }
+    setTimeout(() => setIsVisualising(false), 1250);
   };
 
   const visualiseDijkstra = () => {
+    // disable if already visualising the algorithm
+    resetGrid()
+    setIsVisualising(true);
     const startNode = grid[START_NODE_ROW][START_NODE_COL];
     const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
-    const visitedNodeOrder = dijkstra(grid, startNode, finishNode);
-    const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
-    animateDijkstra(visitedNodeOrder, nodesInShortestPathOrder);
+    visitedNodeOrder.current = dijkstra(grid, startNode, finishNode)
+    const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode)
+    animateDijkstra(visitedNodeOrder.current, nodesInShortestPathOrder);
   };
 
   const createNode = (row, col) => {
     return {
-      col,
       row,
+      col,
       isStart: row === START_NODE_ROW && col === START_NODE_COL,
       isFinish: row === FINISH_NODE_ROW && col === FINISH_NODE_COL,
       isVisited: false,
@@ -76,10 +80,26 @@ export default function Grid() {
     };
   };
 
+  const resetGrid = () => {
+    for (let i = 0; i < visitedNodeOrder.current.length; i++) {
+      const node = visitedNodeOrder.current[i];
+      if (node.row === START_NODE_ROW && node.col === START_NODE_COL) {
+        nodeRefArray.current[`${node.row}-${node.col}`].className = "node node-start"
+      } else if (node.row === FINISH_NODE_ROW && node.col === FINISH_NODE_COL) {
+        nodeRefArray.current[`${node.row}-${node.col}`].className = "node node-finish"
+      } else {
+        nodeRefArray.current[`${node.row}-${node.col}`].className = "node"
+      }
+    }
+  }
+
   return (
     <>
-      <button onClick={() => visualiseDijkstra()}>
-        Visualize Dijkstra's Algorithm
+      <button disabled={isVisualising} onClick={() => resetGrid()}>
+        Reset
+    </button>
+      <button disabled={isVisualising} onClick={() => visualiseDijkstra()}>
+        Visualise Dijkstra's Algorithm
       </button>
       <div className="grid">
         {grid.map((row, rowId) => {
