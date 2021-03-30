@@ -13,9 +13,8 @@ const FINISH_NODE_COL = 35;
 export default function Grid() {
   const [grid, setGrid] = useState([]);
   const [isVisualising, setIsVisualising] = useState(false);
-  const visitedNodeOrder = useRef([])
+  const visitedNodeOrder = useRef([]);
   const nodeRefArray = useRef([]);
-
 
   useEffect(() => {
     const grid = [];
@@ -28,7 +27,6 @@ export default function Grid() {
     }
     setGrid(grid);
   }, []);
-
 
   const animateDijkstra = (visitedNodeOrder, nodesInShortestPathOrder) => {
     for (let i = 0; i <= visitedNodeOrder.length; i++) {
@@ -59,12 +57,12 @@ export default function Grid() {
 
   const visualiseDijkstra = () => {
     // disable if already visualising the algorithm
-    resetGrid()
+    resetGrid();
     setIsVisualising(true);
     const startNode = grid[START_NODE_ROW][START_NODE_COL];
     const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
-    visitedNodeOrder.current = dijkstra(grid, startNode, finishNode)
-    const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode)
+    visitedNodeOrder.current = dijkstra(grid, startNode, finishNode);
+    const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
     animateDijkstra(visitedNodeOrder.current, nodesInShortestPathOrder);
   };
 
@@ -81,23 +79,26 @@ export default function Grid() {
   };
 
   const resetGrid = () => {
+    setIsVisualising(false);
     for (let i = 0; i < visitedNodeOrder.current.length; i++) {
       const node = visitedNodeOrder.current[i];
       if (node.row === START_NODE_ROW && node.col === START_NODE_COL) {
-        nodeRefArray.current[`${node.row}-${node.col}`].className = "node node-start"
+        nodeRefArray.current[`${node.row}-${node.col}`].className =
+          "node node-start";
       } else if (node.row === FINISH_NODE_ROW && node.col === FINISH_NODE_COL) {
-        nodeRefArray.current[`${node.row}-${node.col}`].className = "node node-finish"
+        nodeRefArray.current[`${node.row}-${node.col}`].className =
+          "node node-finish";
       } else {
-        nodeRefArray.current[`${node.row}-${node.col}`].className = "node"
+        nodeRefArray.current[`${node.row}-${node.col}`].className = "node";
       }
     }
-  }
+  };
 
   return (
     <>
       <button disabled={isVisualising} onClick={() => resetGrid()}>
         Reset
-    </button>
+      </button>
       <button disabled={isVisualising} onClick={() => visualiseDijkstra()}>
         Visualise Dijkstra's Algorithm
       </button>
