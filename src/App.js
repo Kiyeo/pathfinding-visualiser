@@ -98,6 +98,12 @@ const App = () => {
     setIsNewFinishNode(false);
   };
 
+  const handleMouseLeave = () => {
+    isMousePressed.current = false;
+    setIsNewStartNode(false);
+    setIsNewFinishNode(false);
+  };
+
   const getNewStartNode = (grid, row, col) => {
     const newGrid = grid.slice();
     const prevNode = newGrid[row][col];
@@ -201,30 +207,36 @@ const App = () => {
       <button disabled={isVisualising} onClick={() => visualiseDijkstra()}>
         Visualise Dijkstra's Algorithm
       </button>
-      <div className="grid">
-        {grid.map((row, rowId) => {
-          return (
-            <div key={rowId}>
-              {row.map((node) => {
-                const { row, col, isStart, isFinish, isVisited } = node;
-                return (
-                  <Node
-                    key={`${row}-${col}`}
-                    ref={(el) => (nodeRefArray.current[`${row}-${col}`] = el)}
-                    handleMouseDown={(row, col) => handleMouseDown(row, col)}
-                    handleMouseEnter={(row, col) => handleMouseEnter(row, col)}
-                    handleMouseUp={() => handleMouseUp()}
-                    row={row}
-                    col={col}
-                    isStart={isStart}
-                    isFinish={isFinish}
-                    isVisited={isVisited}
-                  ></Node>
-                );
-              })}
-            </div>
-          );
-        })}
+      <div
+        className="grid"
+        onMouseLeave={() => handleMouseLeave()}
+        style={{
+          margin: "100px auto",
+          display: "grid",
+          gridTemplateColumns: `repeat(${NUM_COLUMNS}, 25px)`,
+          //makes the grid width relative to node dimension
+          width: `${NUM_COLUMNS * 25}px`,
+        }}
+      >
+        {grid.map((row) =>
+          row.map((node) => {
+            const { row, col, isStart, isFinish, isVisited } = node;
+            return (
+              <Node
+                key={`${row}-${col}`}
+                ref={(el) => (nodeRefArray.current[`${row}-${col}`] = el)}
+                handleMouseDown={(row, col) => handleMouseDown(row, col)}
+                handleMouseEnter={(row, col) => handleMouseEnter(row, col)}
+                handleMouseUp={() => handleMouseUp()}
+                row={row}
+                col={col}
+                isStart={isStart}
+                isFinish={isFinish}
+                isVisited={isVisited}
+              ></Node>
+            );
+          })
+        )}
       </div>
     </div>
   );

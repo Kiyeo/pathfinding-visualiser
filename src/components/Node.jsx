@@ -15,7 +15,6 @@ export default forwardRef((props, ref) => {
 
   return (
     <div
-      draggable={false}
       onMouseDown={() => {
         handleMouseDown(row, col);
       }}
@@ -25,7 +24,10 @@ export default forwardRef((props, ref) => {
       onMouseUp={() => {
         handleMouseUp();
       }}
-      onDragStart={() => false}
+      onDragStart={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
       ref={ref}
       className={`node ${extraClassName}`}
     ></div>
