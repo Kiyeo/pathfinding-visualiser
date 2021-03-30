@@ -11,10 +11,29 @@ const NUM_COLUMNS = 50;
 
 const START_NODE_ROW = 10;
 const START_NODE_COL = 15;
-const FINISH_NODE_ROW = 5;
+const FINISH_NODE_ROW = 10;
 const FINISH_NODE_COL = 35;
 
 const App = () => {
+  const startNode = useRef();
+  const finishNode = useRef();
+
+  const getInitialGrid = () => {
+    const grid = [];
+    for (let row = 0; row < NUM_ROWS; row++) {
+      const currentRow = [];
+      for (let col = 0; col < NUM_COLUMNS; col++) {
+        currentRow.push(createNode(row, col));
+        if (row === START_NODE_ROW && col === START_NODE_COL)
+          startNode.current = { row, col };
+        if (row === FINISH_NODE_ROW && col === FINISH_NODE_COL)
+          finishNode.current = { row, col };
+      }
+      grid.push(currentRow);
+    }
+    return grid;
+  };
+
   const createNode = (row, col) => {
     return {
       row,
@@ -27,23 +46,93 @@ const App = () => {
     };
   };
 
-  const [grid, setGrid] = useState(() => {
-    const grid = [];
-    for (let row = 0; row < 20; row++) {
-      const currentRow = [];
-      for (let col = 0; col < 50; col++) {
-        currentRow.push(createNode(row, col));
-      }
-      grid.push(currentRow);
-    }
-    return grid;
-  });
-
+  const [grid, setGrid] = useState(() => getInitialGrid());
   const [isVisualising, setIsVisualising] = useState(false);
   const visitedNodeOrder = useRef([]);
   const nodeRefArray = useRef([]);
+  const isMousePressed = useRef(false);
+  const [isNewStartNode, setIsNewStartNode] = useState(false);
+  const [isNewFinishNode, setIsNewFinishNode] = useState(false);
 
   useEffect(() => {}, []);
+
+  const handleMouseDown = (row, col) => {
+    isMousePressed.current = true;
+    if (
+      row === startNode.current.row &&
+      col === startNode.current.col &&
+      !isVisualising
+    ) {
+      setIsNewStartNode(true);
+    }
+    if (
+      row === finishNode.current.row &&
+      col === finishNode.current.col &&
+      !isVisualising
+    ) {
+      setIsNewFinishNode(true);
+    }
+  };
+
+  const handleMouseEnter = (row, col) => {
+    if (!isMousePressed.current && !isVisualising) return;
+    if (
+      isNewStartNode &&
+      !(row === finishNode.current.row && col === finishNode.current.col)
+    ) {
+      const newGrid = getNewStartNode(grid, row, col);
+      setGrid(newGrid);
+    }
+    if (
+      isNewFinishNode &&
+      !(row === startNode.current.row && col === startNode.current.col)
+    ) {
+      const newGrid = getNewStartNode(grid, row, col);
+      setGrid(newGrid);
+    }
+  };
+
+  const handleMouseUp = () => {
+    isMousePressed.current = false;
+    setIsNewStartNode(false);
+    setIsNewFinishNode(false);
+  };
+
+  const getNewStartNode = (grid, row, col) => {
+    const newGrid = grid.slice();
+    const prevNode = newGrid[row][col];
+    if (isNewStartNode) {
+      const newStartNode = {
+        ...prevNode,
+        isStart: true,
+      };
+      const prevStartNode =
+        newGrid[startNode.current.row][startNode.current.col];
+      const rmPrevStartNode = {
+        ...prevStartNode,
+        isStart: false,
+      };
+      newGrid[row][col] = newStartNode;
+      newGrid[startNode.current.row][startNode.current.col] = rmPrevStartNode;
+      startNode.current = { row, col };
+      return newGrid;
+    } else {
+      const newStartNode = {
+        ...prevNode,
+        isFinish: true,
+      };
+      const prevStartNode =
+        newGrid[finishNode.current.row][finishNode.current.col];
+      const rmPrevStartNode = {
+        ...prevStartNode,
+        isFinish: false,
+      };
+      newGrid[row][col] = newStartNode;
+      newGrid[finishNode.current.row][finishNode.current.col] = rmPrevStartNode;
+      finishNode.current = { row, col };
+      return newGrid;
+    }
+  };
 
   const animateDijkstra = (visitedNodeOrder, nodesInShortestPathOrder) => {
     for (let i = 0; i <= visitedNodeOrder.length; i++) {
@@ -62,29 +151,34 @@ const App = () => {
   };
 
   const animateShortestPath = (nodesInShortestPathOrder) => {
+    let delay = 0;
     for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
+      delay = i;
       setTimeout(() => {
         const node = nodesInShortestPathOrder[i];
         nodeRefArray.current[`${node.row}-${node.col}`].className =
           "node node-shortest-path";
       }, 50 * i);
     }
-    setTimeout(() => setIsVisualising(false), 1250);
+    setTimeout(() => setIsVisualising(false), 50 * delay);
   };
 
   const visualiseDijkstra = () => {
     // disable if already visualising the algorithm
-    resetGrid();
+    //resetGrid();
     setIsVisualising(true);
-    const startNode = grid[START_NODE_ROW][START_NODE_COL];
-    const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
-    visitedNodeOrder.current = dijkstra(grid, startNode, finishNode);
-    const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
+    const nodeStart = grid[startNode.current.row][startNode.current.col];
+    const nodeFinish = grid[finishNode.current.row][finishNode.current.col];
+    visitedNodeOrder.current = dijkstra(grid, nodeStart, nodeFinish);
+    const nodesInShortestPathOrder = getNodesInShortestPathOrder(nodeFinish);
     animateDijkstra(visitedNodeOrder.current, nodesInShortestPathOrder);
   };
 
   const resetGrid = () => {
     setIsVisualising(false);
+    isMousePressed.current = false;
+    const initialGrid = getInitialGrid();
+    setGrid(initialGrid);
     for (let i = 0; i < visitedNodeOrder.current.length; i++) {
       const node = visitedNodeOrder.current[i];
       if (node.row === START_NODE_ROW && node.col === START_NODE_COL) {
@@ -111,16 +205,20 @@ const App = () => {
         {grid.map((row, rowId) => {
           return (
             <div key={rowId}>
-              {row.map((node, nodeId) => {
-                const { row, col, isStart, isFinish } = node;
+              {row.map((node) => {
+                const { row, col, isStart, isFinish, isVisited } = node;
                 return (
                   <Node
-                    key={nodeId}
+                    key={`${row}-${col}`}
                     ref={(el) => (nodeRefArray.current[`${row}-${col}`] = el)}
+                    handleMouseDown={(row, col) => handleMouseDown(row, col)}
+                    handleMouseEnter={(row, col) => handleMouseEnter(row, col)}
+                    handleMouseUp={() => handleMouseUp()}
                     row={row}
                     col={col}
                     isStart={isStart}
                     isFinish={isFinish}
+                    isVisited={isVisited}
                   ></Node>
                 );
               })}
