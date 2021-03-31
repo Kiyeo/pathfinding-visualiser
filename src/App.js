@@ -50,32 +50,35 @@ const App = () => {
   const [isVisualising, setIsVisualising] = useState(false);
   const visitedNodeOrder = useRef([]);
   const nodeRefArray = useRef([]);
-  const isMousePressed = useRef(false);
+  const [isMousePressed, setIsMousePressed] = useState(false);
   const [isNewStartNode, setIsNewStartNode] = useState(false);
   const [isNewFinishNode, setIsNewFinishNode] = useState(false);
+  const [isPostVisualise, setIsPostVisualise] = useState(false);
 
   useEffect(() => {}, []);
 
   const handleMouseDown = (row, col) => {
-    isMousePressed.current = true;
+    setIsMousePressed(true);
     if (
       row === startNode.current.row &&
       col === startNode.current.col &&
-      !isVisualising
+      !isVisualising &&
+      !isPostVisualise
     ) {
       setIsNewStartNode(true);
     }
     if (
       row === finishNode.current.row &&
       col === finishNode.current.col &&
-      !isVisualising
+      !isVisualising &&
+      !isPostVisualise
     ) {
       setIsNewFinishNode(true);
     }
   };
 
   const handleMouseEnter = (row, col) => {
-    if (!isMousePressed.current && !isVisualising) return;
+    if (!isMousePressed && !isVisualising) return;
     if (
       isNewStartNode &&
       !(row === finishNode.current.row && col === finishNode.current.col)
@@ -93,13 +96,13 @@ const App = () => {
   };
 
   const handleMouseUp = () => {
-    isMousePressed.current = false;
+    setIsMousePressed(false);
     setIsNewStartNode(false);
     setIsNewFinishNode(false);
   };
 
   const handleMouseLeave = () => {
-    isMousePressed.current = false;
+    setIsMousePressed(false);
     setIsNewStartNode(false);
     setIsNewFinishNode(false);
   };
@@ -167,11 +170,13 @@ const App = () => {
       }, 50 * i);
     }
     setTimeout(() => setIsVisualising(false), 50 * delay);
+    setIsPostVisualise(true);
   };
 
   const visualiseDijkstra = () => {
     // disable if already visualising the algorithm
     //resetGrid();
+    if (isPostVisualise) resetVisitedNodeCSS();
     setIsVisualising(true);
     const nodeStart = grid[startNode.current.row][startNode.current.col];
     const nodeFinish = grid[finishNode.current.row][finishNode.current.col];
@@ -182,15 +187,26 @@ const App = () => {
 
   const resetGrid = () => {
     setIsVisualising(false);
-    isMousePressed.current = false;
+    setIsMousePressed(false);
+    setIsPostVisualise(false);
     const initialGrid = getInitialGrid();
     setGrid(initialGrid);
+    resetVisitedNodeCSS();
+  };
+
+  const resetVisitedNodeCSS = () => {
+    const nodeStart = isPostVisualise
+      ? startNode.current
+      : { row: START_NODE_ROW, col: START_NODE_COL };
+    const nodeFinish = isPostVisualise
+      ? finishNode.current
+      : { row: FINISH_NODE_ROW, col: FINISH_NODE_COL };
     for (let i = 0; i < visitedNodeOrder.current.length; i++) {
       const node = visitedNodeOrder.current[i];
-      if (node.row === START_NODE_ROW && node.col === START_NODE_COL) {
+      if (node.row === nodeStart.row && node.col === nodeStart.col) {
         nodeRefArray.current[`${node.row}-${node.col}`].className =
           "node node-start";
-      } else if (node.row === FINISH_NODE_ROW && node.col === FINISH_NODE_COL) {
+      } else if (node.row === nodeFinish.row && node.col === nodeFinish.col) {
         nodeRefArray.current[`${node.row}-${node.col}`].className =
           "node node-finish";
       } else {
