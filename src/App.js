@@ -83,14 +83,14 @@ const App = () => {
       isNewStartNode &&
       !(row === finishNode.current.row && col === finishNode.current.col)
     ) {
-      const newGrid = getNewStartNode(grid, row, col);
+      const newGrid = setNewStartOrFinishNode(grid, row, col);
       setGrid(newGrid);
     }
     if (
       isNewFinishNode &&
       !(row === startNode.current.row && col === startNode.current.col)
     ) {
-      const newGrid = getNewStartNode(grid, row, col);
+      const newGrid = setNewStartOrFinishNode(grid, row, col);
       setGrid(newGrid);
     }
   };
@@ -107,40 +107,33 @@ const App = () => {
     setIsNewFinishNode(false);
   };
 
-  const getNewStartNode = (grid, row, col) => {
+  const setNewStartOrFinishNode = (grid, row, col) => {
     const newGrid = grid.slice();
     const prevNode = newGrid[row][col];
+    const currentStartFinishNode = isNewStartNode
+      ? startNode.current
+      : finishNode.current;
+    const type = isNewStartNode ? "isStart" : "isFinish";
+    const newStartFinishNode = {
+      ...prevNode,
+      [type]: true,
+    };
+    const prevStartFinishNode =
+      newGrid[currentStartFinishNode.row][currentStartFinishNode.col];
+    const rmPrevStartNode = {
+      ...prevStartFinishNode,
+      [type]: false,
+    };
+    newGrid[row][col] = newStartFinishNode;
+    newGrid[currentStartFinishNode.row][
+      currentStartFinishNode.col
+    ] = rmPrevStartNode;
     if (isNewStartNode) {
-      const newStartNode = {
-        ...prevNode,
-        isStart: true,
-      };
-      const prevStartNode =
-        newGrid[startNode.current.row][startNode.current.col];
-      const rmPrevStartNode = {
-        ...prevStartNode,
-        isStart: false,
-      };
-      newGrid[row][col] = newStartNode;
-      newGrid[startNode.current.row][startNode.current.col] = rmPrevStartNode;
       startNode.current = { row, col };
-      return newGrid;
     } else {
-      const newStartNode = {
-        ...prevNode,
-        isFinish: true,
-      };
-      const prevStartNode =
-        newGrid[finishNode.current.row][finishNode.current.col];
-      const rmPrevStartNode = {
-        ...prevStartNode,
-        isFinish: false,
-      };
-      newGrid[row][col] = newStartNode;
-      newGrid[finishNode.current.row][finishNode.current.col] = rmPrevStartNode;
       finishNode.current = { row, col };
-      return newGrid;
     }
+    return newGrid;
   };
 
   const animateDijkstra = (visitedNodeOrder, nodesInShortestPathOrder) => {
