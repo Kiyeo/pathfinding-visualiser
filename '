@@ -52,7 +52,6 @@ const App = () => {
   const visitedNodeOrder = useRef([]);
   const nodeRefArray = useRef([]);
   const isResetting = useRef(false);
-  const timeOut = useRef([]);
   const [isMousePressed, setIsMousePressed] = useState(false);
   const [isNewStartNode, setIsNewStartNode] = useState(false);
   const [isNewFinishNode, setIsNewFinishNode] = useState(false);
@@ -140,21 +139,19 @@ const App = () => {
 
   const animateDijkstra = (visitedNodeOrder, nodesInShortestPathOrder) => {
     for (let i = 0; i <= visitedNodeOrder.length; i++) {
+      if (isResetting.current) return;
       if (i === visitedNodeOrder.length) {
-        timeOut.current.push(
-          setTimeout(() => {
-            animateShortestPath(nodesInShortestPathOrder);
-          }, 5 * i)
-        );
+        setTimeout(() => {
+          animateShortestPath(nodesInShortestPathOrder);
+        }, 5 * i);
         return;
       }
-      timeOut.current.push(
-        setTimeout(() => {
-          const node = visitedNodeOrder[i];
-          nodeRefArray.current[`${node.row}-${node.col}`].className =
-            "node node-visited";
-        }, 5 * i)
-      );
+      setTimeout(() => {
+        if (isResetting.current) return;
+        const node = visitedNodeOrder[i];
+        nodeRefArray.current[`${node.row}-${node.col}`].className =
+          "node node-visited";
+      }, 5 * i);
     }
   };
 
@@ -162,15 +159,14 @@ const App = () => {
     let delay = 0;
     for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
       delay = i;
-      timeOut.current.push(
-        setTimeout(() => {
-          const node = nodesInShortestPathOrder[i];
-          nodeRefArray.current[`${node.row}-${node.col}`].className =
-            "node node-shortest-path";
-        }, 50 * i)
-      );
+      setTimeout(() => {
+        if (isResetting.current) return;
+        const node = nodesInShortestPathOrder[i];
+        nodeRefArray.current[`${node.row}-${node.col}`].className =
+          "node node-shortest-path";
+      }, 50 * i);
     }
-    timeOut.current.push(setTimeout(() => setIsVisualising(false), 50 * delay));
+    setTimeout(() => setIsVisualising(false), 50 * delay);
     setIsPostVisualise(true);
   };
 
@@ -184,12 +180,10 @@ const App = () => {
     visitedNodeOrder.current = dijkstra(grid, nodeStart, nodeFinish);
     const nodesInShortestPathOrder = getNodesInShortestPathOrder(nodeFinish);
     animateDijkstra(visitedNodeOrder.current, nodesInShortestPathOrder);
+    isResetting.current = false;
   };
 
   const resetGrid = () => {
-    timeOut.current.forEach((timer) => {
-      clearTimeout(timer);
-    });
     isResetting.current = true;
     setIsVisualising(false);
     setIsMousePressed(false);

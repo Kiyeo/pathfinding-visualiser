@@ -80,3 +80,10 @@
     background-color: rgb(255, 254, 106);
   }
 }
+
+.notransition {
+  -webkit-transition: none !important;
+  -moz-transition: none !important;
+  -o-transition: none !important;
+  transition: none !important;
+}
