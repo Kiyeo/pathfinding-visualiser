@@ -7,29 +7,43 @@ export default forwardRef((props, ref) => {
     col,
     isStart,
     isFinish,
-    handleMouseDown,
-    handleMouseEnter,
-    handleMouseUp,
+    handleMouseDownForNode,
+    handleMouseEnterForNode,
+    handleMouseUpForNode,
+    displayWeight,
+    isShowWeight,
   } = props;
   const extraClassName = isFinish ? "node-finish" : isStart ? "node-start" : "";
 
   return (
     <div
+      id={`${row}-${col}`}
       onMouseDown={() => {
-        handleMouseDown(row, col);
+        handleMouseDownForNode(row, col);
       }}
       onMouseEnter={() => {
-        handleMouseEnter(row, col);
+        handleMouseEnterForNode(row, col);
       }}
       onMouseUp={() => {
-        handleMouseUp();
+        handleMouseUpForNode();
       }}
       onDragStart={(e) => {
+        // Block drag default event
         e.preventDefault();
         e.stopPropagation();
       }}
       ref={ref}
       className={`node ${extraClassName}`}
-    ></div>
+    >
+      {isStart
+        ? ""
+        : isFinish
+        ? ""
+        : displayWeight === Infinity
+        ? ""
+        : isShowWeight
+        ? ""
+        : displayWeight}
+    </div>
   );
 });

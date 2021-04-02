@@ -34,15 +34,24 @@ const App = () => {
     return grid;
   };
 
-  const createNode = (row, col) => {
+  const createNode = (
+    row,
+    col,
+    cumulativeWeight = null,
+    startNode = { row: START_NODE_ROW, col: START_NODE_COL },
+    finishNode = { row: FINISH_NODE_ROW, col: FINISH_NODE_COL }
+  ) => {
     return {
       row,
       col,
-      isStart: row === START_NODE_ROW && col === START_NODE_COL,
-      isFinish: row === FINISH_NODE_ROW && col === FINISH_NODE_COL,
+      isStart: row === startNode.row && col === startNode.col,
+      isFinish: row === finishNode.row && col === finishNode.col,
       isVisited: false,
       distance: Infinity,
       previousNode: null,
+      displayWeight: cumulativeWeight,
+      cumulativeWeight,
+      isShowWeight: false,
     };
   };
 
@@ -52,6 +61,7 @@ const App = () => {
   const visitedNodeOrder = useRef([]);
   const nodeRefArray = useRef([]);
   const isResetting = useRef(false);
+  const isRandomWeights = useRef(false);
   const timeOut = useRef([]);
   const [isMousePressed, setIsMousePressed] = useState(false);
   const [isNewStartNode, setIsNewStartNode] = useState(false);
@@ -59,7 +69,7 @@ const App = () => {
 
   useEffect(() => {}, []);
 
-  const handleMouseDown = (row, col) => {
+  const handleMouseDownForNode = (row, col) => {
     setIsMousePressed(true);
     if (
       row === startNode.current.row &&
@@ -79,7 +89,7 @@ const App = () => {
     }
   };
 
-  const handleMouseEnter = (row, col) => {
+  const handleMouseEnterForNode = (row, col) => {
     if (!isMousePressed && !isVisualising) return;
     if (
       isNewStartNode &&
@@ -97,13 +107,13 @@ const App = () => {
     }
   };
 
-  const handleMouseUp = () => {
+  const handleMouseUpForNode = () => {
     setIsMousePressed(false);
     setIsNewStartNode(false);
     setIsNewFinishNode(false);
   };
 
-  const handleMouseLeave = () => {
+  const handleMouseLeaveForGrid = () => {
     setIsMousePressed(false);
     setIsNewStartNode(false);
     setIsNewFinishNode(false);
@@ -151,8 +161,10 @@ const App = () => {
       timeOut.current.push(
         setTimeout(() => {
           const node = visitedNodeOrder[i];
-          nodeRefArray.current[`${node.row}-${node.col}`].className =
-            "node node-visited";
+          const nodeRef = nodeRefArray.current[`${node.row}-${node.col}`];
+          if (isRandomWeights.current)
+            nodeRef.innerText = `${node.cumulativeWeight}`;
+          nodeRef.className = "node node-visited";
         }, 5 * i)
       );
     }
@@ -181,12 +193,18 @@ const App = () => {
     setIsVisualising(true);
     const nodeStart = grid[startNode.current.row][startNode.current.col];
     const nodeFinish = grid[finishNode.current.row][finishNode.current.col];
-    visitedNodeOrder.current = dijkstra(grid, nodeStart, nodeFinish);
+    visitedNodeOrder.current = dijkstra(
+      grid,
+      nodeStart,
+      nodeFinish,
+      isRandomWeights.current
+    );
     const nodesInShortestPathOrder = getNodesInShortestPathOrder(nodeFinish);
     animateDijkstra(visitedNodeOrder.current, nodesInShortestPathOrder);
   };
 
   const resetGrid = () => {
+    isRandomWeights.current = false;
     timeOut.current.forEach((timer) => {
       clearTimeout(timer);
     });
@@ -208,27 +226,90 @@ const App = () => {
       : { row: FINISH_NODE_ROW, col: FINISH_NODE_COL };
     for (let i = 0; i < visitedNodeOrder.current.length; i++) {
       const node = visitedNodeOrder.current[i];
+      const nodeRef = nodeRefArray.current[`${node.row}-${node.col}`];
       if (node.row === nodeStart.row && node.col === nodeStart.col) {
-        nodeRefArray.current[`${node.row}-${node.col}`].className =
-          "node node-start";
+        nodeRef.innerText = "";
+        nodeRef.className = "node node-start";
       } else if (node.row === nodeFinish.row && node.col === nodeFinish.col) {
-        nodeRefArray.current[`${node.row}-${node.col}`].className =
-          "node node-finish";
+        nodeRef.innerText = "";
+        nodeRef.className = "node node-finish";
       } else {
-        nodeRefArray.current[`${node.row}-${node.col}`].className = "node";
+        if (isPostVisualise && isRandomWeights.current) {
+          nodeRef.innerText = `${node.displayWeight}`;
+        } else {
+          nodeRef.innerText = "";
+        }
+        nodeRef.className = "node";
       }
     }
+  };
+
+  const randomWeights = () => {
+    isRandomWeights.current = true;
+    const grid = [];
+    const startNodeRow = startNode.current.row;
+    const startNodeCol = startNode.current.col;
+    const finishNodeRow = finishNode.current.row;
+    const finishNodeCol = finishNode.current.col;
+    for (let row = 0; row < NUM_ROWS; row++) {
+      const currentRow = [];
+      for (let col = 0; col < NUM_COLUMNS; col++) {
+        const nodeRef = nodeRefArray.current[`${row}-${col}`];
+        if (row === startNodeRow && col === startNodeCol) {
+          currentRow.push(
+            createNode(
+              startNodeRow,
+              startNodeCol,
+              null,
+              { row: startNodeRow, col: startNodeCol },
+              { row: finishNodeRow, col: finishNodeCol }
+            )
+          );
+          nodeRef.className = "node node-start";
+        } else if (row === finishNodeRow && col === finishNodeCol) {
+          currentRow.push(
+            createNode(
+              finishNodeRow,
+              finishNodeCol,
+              null,
+              { row: startNodeRow, col: startNodeCol },
+              { row: finishNodeRow, col: finishNodeCol }
+            )
+          );
+          nodeRef.className = "node node-finish";
+        } else {
+          currentRow.push(
+            createNode(
+              row,
+              col,
+              Math.random() > 0.5 ? Math.ceil(Math.random() * 4) : 1,
+              { row: startNodeRow, col: startNodeCol },
+              { row: finishNodeRow, col: finishNodeCol }
+            )
+          );
+          nodeRef.className = "node";
+        }
+      }
+      grid.push(currentRow);
+    }
+    setGrid(grid);
   };
 
   return (
     <div className="App">
       <button onClick={() => resetGrid()}>Reset</button>
+      <button
+        disabled={isVisualising || isPostVisualise}
+        onClick={() => randomWeights()}
+      >
+        Random Weights
+      </button>
       <button disabled={isVisualising} onClick={() => visualiseDijkstra()}>
         Visualise Dijkstra's Algorithm
       </button>
       <div
         className="grid"
-        onMouseLeave={() => handleMouseLeave()}
+        onMouseLeave={() => handleMouseLeaveForGrid()}
         style={{
           margin: "100px auto",
           display: "grid",
@@ -239,19 +320,35 @@ const App = () => {
       >
         {grid.map((row) =>
           row.map((node) => {
-            const { row, col, isStart, isFinish, isVisited } = node;
+            const {
+              row,
+              col,
+              isStart,
+              isFinish,
+              isVisited,
+              displayWeight,
+              cumulativeWeight,
+              isShowWeight,
+            } = node;
             return (
               <Node
                 key={`${row}-${col}`}
                 ref={(el) => (nodeRefArray.current[`${row}-${col}`] = el)}
-                handleMouseDown={(row, col) => handleMouseDown(row, col)}
-                handleMouseEnter={(row, col) => handleMouseEnter(row, col)}
-                handleMouseUp={() => handleMouseUp()}
+                handleMouseDownForNode={(row, col) =>
+                  handleMouseDownForNode(row, col)
+                }
+                handleMouseEnterForNode={(row, col) =>
+                  handleMouseEnterForNode(row, col)
+                }
+                handleMouseUpForNode={() => handleMouseUpForNode()}
                 row={row}
                 col={col}
                 isStart={isStart}
                 isFinish={isFinish}
                 isVisited={isVisited}
+                displayWeight={displayWeight}
+                cumulativeWeight={cumulativeWeight}
+                isShowWeight={isShowWeight}
               ></Node>
             );
           })
