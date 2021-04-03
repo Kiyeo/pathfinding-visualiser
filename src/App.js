@@ -8,6 +8,7 @@ import "./App.css";
 
 const NUM_ROWS = 20;
 const NUM_COLUMNS = 50;
+const NODE_PIXEL = 25;
 
 const START_NODE_ROW = 10;
 const START_NODE_COL = 15;
@@ -64,7 +65,7 @@ const App = () => {
   const isRandomWeights = useRef(false);
   const timeOut = useRef([]);
   const [isMousePressed, setIsMousePressed] = useState(false);
-  const [isNewStartNode, setIsNewStartNode] = useState(false);
+  const [isStartFinishNode, setIsNewStartNode] = useState(false);
   const [isNewFinishNode, setIsNewFinishNode] = useState(false);
 
   useEffect(() => {}, []);
@@ -92,18 +93,16 @@ const App = () => {
   const handleMouseEnterForNode = (row, col) => {
     if (!isMousePressed && !isVisualising) return;
     if (
-      isNewStartNode &&
+      isStartFinishNode &&
       !(row === finishNode.current.row && col === finishNode.current.col)
     ) {
-      const newGrid = setNewStartOrFinishNode(grid, row, col);
-      setGrid(newGrid);
+      setNewStartOrFinishNode(grid, row, col);
     }
     if (
       isNewFinishNode &&
       !(row === startNode.current.row && col === startNode.current.col)
     ) {
-      const newGrid = setNewStartOrFinishNode(grid, row, col);
-      setGrid(newGrid);
+      setNewStartOrFinishNode(grid, row, col);
     }
   };
 
@@ -121,31 +120,35 @@ const App = () => {
 
   const setNewStartOrFinishNode = (grid, row, col) => {
     const newGrid = grid.slice();
-    const prevNode = newGrid[row][col];
-    const currentStartFinishNode = isNewStartNode
+    // keep the new start or finish nodes previous (json) values
+    const prevNodeValues = newGrid[row][col];
+    const currentStartFinishNode = isStartFinishNode
       ? startNode.current
       : finishNode.current;
-    const type = isNewStartNode ? "isStart" : "isFinish";
+    // only change the type of the start or finish node
+    const type = isStartFinishNode ? "isStart" : "isFinish";
     const newStartFinishNode = {
-      ...prevNode,
+      ...prevNodeValues,
       [type]: true,
     };
-    const prevStartFinishNode =
+    const prevStartFinishNodeValues =
       newGrid[currentStartFinishNode.row][currentStartFinishNode.col];
-    const rmPrevStartNode = {
-      ...prevStartFinishNode,
+    // change the old start or finish node type to false
+    const prevStartFinishNode = {
+      ...prevStartFinishNodeValues,
       [type]: false,
     };
     newGrid[row][col] = newStartFinishNode;
     newGrid[currentStartFinishNode.row][
       currentStartFinishNode.col
-    ] = rmPrevStartNode;
-    if (isNewStartNode) {
+    ] = prevStartFinishNode;
+    // update start or finish node reference
+    if (isStartFinishNode) {
       startNode.current = { row, col };
     } else {
       finishNode.current = { row, col };
     }
-    return newGrid;
+    setGrid(newGrid);
   };
 
   const animateDijkstra = (visitedNodeOrder, nodesInShortestPathOrder) => {
@@ -162,6 +165,7 @@ const App = () => {
         setTimeout(() => {
           const node = visitedNodeOrder[i];
           const nodeRef = nodeRefArray.current[`${node.row}-${node.col}`];
+          // displays cumulative weight if in random weight simulation
           if (isRandomWeights.current)
             nodeRef.innerText = `${node.cumulativeWeight}`;
           nodeRef.className = "node node-visited";
@@ -187,8 +191,7 @@ const App = () => {
   };
 
   const visualiseDijkstra = () => {
-    // disable if already visualising the algorithm
-    //resetGrid();
+    // resets css when resimulating
     if (isPostVisualise) resetVisitedNodeCSS();
     setIsVisualising(true);
     const nodeStart = grid[startNode.current.row][startNode.current.col];
@@ -282,7 +285,7 @@ const App = () => {
             createNode(
               row,
               col,
-              Math.random() > 0.5 ? Math.ceil(Math.random() * 4) : 1,
+              Math.random() > 0.5 ? Math.ceil(Math.random() * 10) : 1,
               { row: startNodeRow, col: startNodeCol },
               { row: finishNodeRow, col: finishNodeCol }
             )
@@ -313,9 +316,9 @@ const App = () => {
         style={{
           margin: "100px auto",
           display: "grid",
-          gridTemplateColumns: `repeat(${NUM_COLUMNS}, 25px)`,
-          //makes the grid width relative to node dimension
-          width: `${NUM_COLUMNS * 25}px`,
+          gridTemplateColumns: `repeat(${NUM_COLUMNS}, ${NODE_PIXEL}px)`,
+          //makes the grid width relative to sum of all node pixels
+          width: `${NUM_COLUMNS * NODE_PIXEL}px`,
         }}
       >
         {grid.map((row) =>

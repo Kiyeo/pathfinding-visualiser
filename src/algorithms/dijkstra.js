@@ -3,10 +3,14 @@
 // previous node, effectively allowing us to compute the shortest path
 // by backtracking from the finish node.
 export function dijkstra(grid, startNode, finishNode, isRandomWeights) {
+  finishNode.isVisited = false;
+  const finishNodeNeighbours = getUnvisitedNeighbors(finishNode, grid);
+  let finishNodeNeighbourVisits = 0;
   const visitedNodes = [];
   startNode.distance = 0;
   startNode.cumulativeWeight = 0;
   const unvisitedNodes = getAllNodes(grid);
+  // terminates when finishNode is reached
   while (true) {
     heapSortNodesByDistance(unvisitedNodes);
     const closestNode = unvisitedNodes.shift();
@@ -14,10 +18,28 @@ export function dijkstra(grid, startNode, finishNode, isRandomWeights) {
     if (closestNode.isWall) continue;
     // If the closest node is at a distance of infinity,
     // we must be trapped and should therefore stop.
-    if (closestNode.distance === Infinity) return visitedNodes;
+    //if (closestNode.distance === Infinity) return visitedNodes;
     closestNode.isVisited = true;
     visitedNodes.push(closestNode);
-    if (closestNode === finishNode) return visitedNodes;
+    if (isRandomWeights) {
+      for (const finishNodeNeighbour of finishNodeNeighbours) {
+        const row = finishNodeNeighbour.row;
+        const col = finishNodeNeighbour.col;
+        if (
+          closestNode.row === row &&
+          closestNode.col === col &&
+          closestNode.isVisited
+        ) {
+          finishNodeNeighbourVisits++;
+        }
+      }
+      if (finishNodeNeighbourVisits === finishNodeNeighbours.length) {
+        finishNodeNeighbours.filter((node) => (node.isVisited = false));
+        return visitedNodes;
+      }
+    } else {
+      if (closestNode === finishNode) return visitedNodes;
+    }
     updateUnvisitedNeighbors(closestNode, grid, isRandomWeights);
   }
 }
@@ -29,24 +51,58 @@ function heapSortNodesByDistance(unvisitedNodes) {
 function updateUnvisitedNeighbors(node, grid, isRandomWeights) {
   const unvisitedNeighbors = getUnvisitedNeighbors(node, grid);
   for (const neighbor of unvisitedNeighbors) {
+    // for weighted simulation
     if (isRandomWeights) {
-      neighbor.distance = neighbor.cumulativeWeight + node.cumulativeWeight;
-      neighbor.cumulativeWeight = neighbor.distance;
-    } else {
-      neighbor.distance = node.distance + 1;
+      if (neighbor.distace === Infinity) {
+        neighbor.distance = neighbor.displayWeight + node.cumulativeWeight;
+        neighbor.cumulativeWeight = neighbor.distance;
+        neighbor.previousNode = node;
+      }
+      // checks and updates the neighbors for the path with the less cost
+      else if (
+        neighbor.distance >
+        neighbor.displayWeight + node.cumulativeWeight
+      ) {
+        neighbor.distance = neighbor.displayWeight + node.cumulativeWeight;
+        neighbor.cumulativeWeight = neighbor.distance;
+        neighbor.previousNode = node;
+      }
     }
-    neighbor.previousNode = node;
+    // for unweighted simulation
+    else {
+      neighbor.distance = node.distance + 1;
+      neighbor.previousNode = node;
+    }
   }
 }
 
 function getUnvisitedNeighbors(node, grid) {
   const neighbors = [];
-  const { col, row } = node;
-  if (row > 0) neighbors.push(grid[row - 1][col]);
-  if (row < grid.length - 1) neighbors.push(grid[row + 1][col]);
-  if (col > 0) neighbors.push(grid[row][col - 1]);
-  if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
-  heapSortNodesByDistance(neighbors);
+  const { row, col } = node;
+  const neighborOperations = [
+    [0, 1],
+    [1, 0],
+    [0, -1],
+    [-1, 0],
+  ];
+  const totalRows = grid.length;
+  const totalCols = grid[0].length;
+  //constant opeations => 4 values
+  for (let i = 0; i < neighborOperations.length; i++) {
+    const operation = neighborOperations[i];
+    const x = operation[0];
+    const y = operation[1];
+    const newRow = row + x;
+    const newCol = col - y;
+    if (
+      newRow >= 0 &&
+      newRow < totalRows &&
+      newCol >= 0 &&
+      newCol < totalCols
+    ) {
+      neighbors.push(grid[newRow][newCol]);
+    }
+  }
   return neighbors.filter((neighbor) => !neighbor.isVisited);
 }
 
