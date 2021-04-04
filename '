@@ -91,33 +91,21 @@ const App = () => {
     } else if (!isVisualising && !isPostVisualise) setWall(grid, row, col);
   };
 
-  const handleMouseEnterForNode = (row, col) => {
+  const handleMouseEnterForNode = (e, row, col) => {
     if (!isMousePressed && !isVisualising) return;
     if (
       isStartFinishNode &&
-      !(row === finishNode.current.row && col === finishNode.current.col) &&
-      !grid[row][col].isWall
+      !(row === finishNode.current.row && col === finishNode.current.col)
     ) {
       setNewStartOrFinishNode(grid, row, col);
     } else if (
       isNewFinishNode &&
-      !(row === startNode.current.row && col === startNode.current.col) &&
-      !grid[row][col].isWall
+      !(row === startNode.current.row && col === startNode.current.col)
     ) {
       setNewStartOrFinishNode(grid, row, col);
     } else if (!isVisualising && !isPostVisualise) setWall(grid, row, col);
   };
-
-  //const handleTouchMoveForNode = (e) => {
-  //  if (!isMousePressed && !isVisualising) return;
-  //  const x = e.touches[0].clientX;
-  //  const y = e.touches[0].clientY;
-  //  const element = document.elementFromPoint(x, y);
-  //  const rowAndCol = element.id.split("-");
-  //  const row = rowAndCol[0];
-  //  const col = rowAndCol[1];
-  //  handleMouseEnterForNode(row, col);
-  //};
+  const handleTouchMoveForNode = () => {};
 
   const handleMouseUpForNode = () => {
     setIsMousePressed(false);
@@ -126,7 +114,9 @@ const App = () => {
   };
 
   const handleMouseLeaveForGrid = () => {
-    handleMouseUpForNode();
+    setIsMousePressed(false);
+    setIsNewStartNode(false);
+    setIsNewFinishNode(false);
   };
 
   const setWall = (grid, row, col) => {
@@ -342,7 +332,6 @@ const App = () => {
           margin: "100px auto",
           display: "grid",
           gridTemplateColumns: `repeat(${NUM_COLUMNS}, ${NODE_PIXEL}px)`,
-          gridTemplateRows: `repeat(${NUM_ROWS}, ${NODE_PIXEL}px)`,
           //makes the grid width relative to sum of all node pixels
           width: `${NUM_COLUMNS * NODE_PIXEL}px`,
           touchAction: "none",
@@ -371,7 +360,9 @@ const App = () => {
                 handleMouseEnterForNode={(row, col) =>
                   handleMouseEnterForNode(row, col)
                 }
-                //handleTouchMoveForNode={(e) => handleTouchMoveForNode(e)}
+                handleTouchMoveForNode={(e, row, col) =>
+                  handleTouchMoveForNode(e, row, col)
+                }
                 handleMouseUpForNode={() => handleMouseUpForNode()}
                 row={row}
                 col={col}

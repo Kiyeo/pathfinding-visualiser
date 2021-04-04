@@ -5,26 +5,37 @@ export default forwardRef((props, ref) => {
   const {
     row,
     col,
+    isWall,
     isStart,
     isFinish,
     handleMouseDownForNode,
     handleMouseEnterForNode,
+    handleTouchMoveForNode,
     handleMouseUpForNode,
     displayWeight,
     isShowWeight,
   } = props;
-  const extraClassName = isFinish ? "node-finish" : isStart ? "node-start" : "";
+  const extraClassName = isFinish
+    ? "node-finish"
+    : isStart
+    ? "node-start"
+    : isWall
+    ? "node-wall"
+    : "";
 
   return (
     <div
       id={`${row}-${col}`}
-      onMouseDown={() => {
+      onPointerDown={() => {
         handleMouseDownForNode(row, col);
       }}
-      onMouseEnter={() => {
+      onPointerEnter={() => {
         handleMouseEnterForNode(row, col);
       }}
-      onMouseUp={() => {
+      //onTouchMove={(e) => {
+      //  handleTouchMoveForNode(e);
+      //}}
+      onPointerUp={() => {
         handleMouseUpForNode();
       }}
       onDragStart={(e) => {
@@ -41,7 +52,7 @@ export default forwardRef((props, ref) => {
         ? ""
         : displayWeight === Infinity
         ? ""
-        : isShowWeight
+        : isShowWeight && !isWall
         ? ""
         : displayWeight}
     </div>

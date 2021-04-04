@@ -1,24 +1,127 @@
+@import url(//db.onlinewebfonts.com/c/d08a067b981040590322dd2495d05893?family=Alcubierre);
+
 .node {
+  font-family: Alcubierre;
+  font-size: 18px;
+  touch-action: none;
   float: left;
   width: 25px;
   height: 25px;
-  background-color: white;
-  border: 1px solid grey;
+  background-color: rgb(175, 216, 248);
+  border: 1px solid white;
   user-select: none;
-}
-
-.node-finish {
-  background-color: red;
   cursor: pointer;
+  color: black;
 }
 
 .node-start {
   background-color: green;
-  cursor: pointer;
+  border: 0px;
+}
+
+.node-start:hover {
+  animation-name: start-finish-hover;
+  animation-duration: 0.3s;
+  animation-timing-function: ease;
+  animation-delay: 0;
+  animation-iteration-count: 1;
+  animation-direction: alternate;
+  animation-fill-mode: forwards;
+}
+
+.node-start:not(:hover) {
+  animation-name: start-finish-unhover;
+  animation-duration: 0.3s;
+  animation-timing-function: ease;
+  animation-delay: 0;
+  animation-iteration-count: 1;
+  animation-direction: alternate;
+  animation-fill-mode: forwards;
+}
+
+.node-finish {
+  background-color: red;
+}
+
+.node-finish:hover {
+  animation-name: start-finish-hover;
+  animation-duration: 0.3s;
+  animation-timing-function: ease;
+  animation-delay: 0;
+  animation-iteration-count: 1;
+  animation-direction: alternate;
+  animation-fill-mode: forwards;
+}
+
+.node-finish:not(:hover) {
+  animation-name: start-finish-unhover;
+  animation-duration: 0.3s;
+  animation-timing-function: ease;
+  animation-delay: 0;
+  animation-iteration-count: 1;
+  animation-direction: alternate;
+  animation-fill-mode: forwards;
 }
 
 .node-weighted {
   display: none;
+}
+
+@keyframes start-finish-hover {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  60% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1.25);
+  }
+}
+
+@keyframes start-finish-unhover {
+  0% {
+    transform: scale(1.25);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  60% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.node-wall {
+  animation-name: setWall;
+  animation-duration: 0.3s;
+  animation-timing-function: ease;
+  animation-delay: 0;
+  animation-iteration-count: 1;
+  animation-direction: alternate;
+  animation-fill-mode: forwards;
+  background-color: rgba(16, 21, 95, 0.781);
+}
+
+@keyframes setWall {
+  0% {
+    transform: scale(0.9);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  60% {
+    transform: scale(1.4);
+  }
+  100% {
+    transform: scale(1);
+    border: 0;
+  }
 }
 
 .node-visited {
@@ -30,6 +133,8 @@
   animation-iteration-count: 1;
   animation-fill-mode: forwards;
   animation-play-state: running;
+  color: black;
+  border: 0px;
 }
 
 @keyframes visitedAnimation {
@@ -54,10 +159,6 @@
   }
 }
 
-.node-wall {
-  background-color: rgb(12, 53, 71);
-}
-
 .node-shortest-path {
   animation-name: shortestPath;
   animation-duration: 1.5s;
@@ -67,22 +168,22 @@
   animation-iteration-count: 1;
   animation-fill-mode: forwards;
   animation-play-state: running;
+  border: 0px;
+  background-color: rgb(255, 254, 106);
+  font-weight: 600;
 }
 
 @keyframes shortestPath {
   0% {
     transform: scale(0.6);
-    background-color: rgb(255, 254, 106);
   }
 
   50% {
     transform: scale(1.2);
-    background-color: rgb(255, 254, 106);
   }
 
   100% {
     transform: scale(1);
-    background-color: rgb(255, 254, 106);
   }
 }
 

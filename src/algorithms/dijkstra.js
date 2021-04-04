@@ -18,10 +18,10 @@ export function dijkstra(grid, startNode, finishNode, isRandomWeights) {
     if (closestNode.isWall) continue;
     // If the closest node is at a distance of infinity,
     // we must be trapped and should therefore stop.
-    //if (closestNode.distance === Infinity) return visitedNodes;
+    if (closestNode.distance === Infinity) return visitedNodes;
     closestNode.isVisited = true;
     visitedNodes.push(closestNode);
-    if (isRandomWeights) {
+    if (isRandomWeights && finishNodeNeighbours.length > 1) {
       for (const finishNodeNeighbour of finishNodeNeighbours) {
         const row = finishNodeNeighbour.row;
         const col = finishNodeNeighbour.col;
@@ -98,7 +98,8 @@ function getUnvisitedNeighbors(node, grid) {
       newRow >= 0 &&
       newRow < totalRows &&
       newCol >= 0 &&
-      newCol < totalCols
+      newCol < totalCols &&
+      !grid[newRow][newCol].isWall
     ) {
       neighbors.push(grid[newRow][newCol]);
     }
