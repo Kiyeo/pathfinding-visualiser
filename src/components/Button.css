@@ -4,7 +4,7 @@ button {
   padding: 0.5rem 1rem 0.5rem 1rem;
   background: rgba(0, 211, 158, 0.8);
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 1rem;
   font-size: 1rem;
   color: white;
   text-align: center;
@@ -16,6 +16,10 @@ button {
  */
 button:focus {
   outline: none;
+}
+
+button:active {
+  transform: translateY(1px);
 }
 
 button:disabled {
@@ -46,5 +50,81 @@ button:hover {
 }
 
 .visualise:disabled {
-  cursor: wait;
+  cursor: progress;
+}
+
+.spinner {
+  border: 0.2rem solid #f3f3f3;
+  border-top: 0.2rem solid #3498db;
+  border-right: 0.2rem solid #3498db;
+  border-bottom: 0.2rem solid #3498db;
+  border-radius: 50%;
+  width: 0.7rem;
+  height: 0.7rem;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.3rem;
+  /*The center of the circle needs to offset 
+   * by margin bottom so that it appears inline
+   */
+  margin-bottom: 0.1rem;
+  animation-name: spinner;
+  animation-duration: 1s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.notify {
+  animation-name: notification;
+  animation-duration: 0.5s;
+  animation-timing-function: ease-out;
+  animation-delay: 0;
+  animation-direction: alternate;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+  animation-play-state: running;
+}
+
+.loading:after {
+  content: ".";
+  animation: dots 1s steps(5, end) infinite;
+}
+
+@keyframes dots {
+  0%,
+  20% {
+    color: rgba(0, 0, 0, 0);
+    text-shadow: 0.25em 0 0 rgba(0, 0, 0, 0), 0.5em 0 0 rgba(0, 0, 0, 0);
+  }
+  40% {
+    color: white;
+    text-shadow: 0.25em 0 0 rgba(0, 0, 0, 0), 0.5em 0 0 rgba(0, 0, 0, 0);
+  }
+  60% {
+    text-shadow: 0.25em 0 0 white, 0.5em 0 0 rgba(0, 0, 0, 0);
+  }
+  80%,
+  100% {
+    text-shadow: 0.25em 0 0 white, 0.5em 0 0 white;
+  }
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes notification {
+  0% {
+    transform: scale(0.9);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }

@@ -213,8 +213,12 @@ const App = () => {
         }, 50 * i)
       );
     }
-    timeOut.current.push(setTimeout(() => setIsVisualising(false), 50 * delay));
-    setIsPostVisualise(true);
+    timeOut.current.push(
+      setTimeout(() => {
+        setIsVisualising(false);
+        setIsPostVisualise(true);
+      }, 55 * delay)
+    );
   };
 
   const visualiseDijkstra = () => {
@@ -358,7 +362,7 @@ const App = () => {
           type={"restore"}
           handleFunction={() => restoreGrid(grid)}
           disable={!(isVisualising || isPostVisualise)}
-          disabledTitle={"Restores state before visualisation"}
+          disabledTitle={"Restores state before the visualisation"}
         ></Button>
         <Button
           type={"random-weights"}
@@ -371,6 +375,8 @@ const App = () => {
           type={"visualise"}
           handleFunction={() => visualiseDijkstra()}
           disable={isVisualising}
+          isVisualising={isVisualising}
+          isPostVisualise={isPostVisualise}
         ></Button>
       </div>
       <div
