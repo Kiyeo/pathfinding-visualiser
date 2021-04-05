@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import Node from "./components/Node.jsx";
+import Button from "./components/Button.jsx";
 import {
   getNodesInShortestPathOrder,
   dijkstra,
@@ -8,7 +9,7 @@ import "./App.css";
 
 const NUM_ROWS = 20;
 const NUM_COLUMNS = 50;
-const NODE_PIXEL = 25;
+const NODE_REM = 2;
 
 const START_NODE_ROW = 10;
 const START_NODE_COL = 15;
@@ -70,8 +71,6 @@ const App = () => {
   const [isStartFinishNode, setIsNewStartNode] = useState(false);
   const [isNewFinishNode, setIsNewFinishNode] = useState(false);
 
-  useEffect(() => {}, []);
-
   const handleMouseDownForNode = (row, col) => {
     setIsMousePressed(true);
     if (
@@ -95,14 +94,14 @@ const App = () => {
     if (!isMousePressed && !isVisualising) return;
     if (
       isStartFinishNode &&
-      !(row === finishNode.current.row && col === finishNode.current.col) &&
-      !grid[row][col].isWall
+      !(row === finishNode.current.row && col === finishNode.current.col) //&&
+      //!grid[row][col].isWall
     ) {
       setNewStartOrFinishNode(grid, row, col);
     } else if (
       isNewFinishNode &&
-      !(row === startNode.current.row && col === startNode.current.col) &&
-      !grid[row][col].isWall
+      !(row === startNode.current.row && col === startNode.current.col) //&&
+      //!grid[row][col].isWall
     ) {
       setNewStartOrFinishNode(grid, row, col);
     } else if (!isVisualising && !isPostVisualise) setWall(grid, row, col);
@@ -151,6 +150,7 @@ const App = () => {
     const type = isStartFinishNode ? "isStart" : "isFinish";
     const newStartFinishNode = {
       ...prevNodeValues,
+      isWall: prevNodeValues.isWall,
       [type]: true,
     };
     const prevStartFinishNodeValues =
@@ -158,6 +158,11 @@ const App = () => {
     // change the old start or finish node type to false
     const prevStartFinishNode = {
       ...prevStartFinishNodeValues,
+      displayWeight:
+        prevStartFinishNodeValues.displayWeight === null &&
+        isRandomWeights.current
+          ? Math.ceil(Math.random() * 10)
+          : prevStartFinishNodeValues.displayWeight,
       [type]: false,
     };
     newGrid[row][col] = newStartFinishNode;
@@ -259,7 +264,7 @@ const App = () => {
         nodeRef.innerText = "";
         nodeRef.className = "node node-finish";
       } else {
-        if (isPostVisualise && isRandomWeights.current) {
+        if ((isVisualising || isPostVisualise) && isRandomWeights.current) {
           nodeRef.innerText = `${node.displayWeight}`;
         } else {
           nodeRef.innerText = "";
@@ -269,8 +274,19 @@ const App = () => {
     }
   };
 
-  const randomWeights = (grid) => {
-    isRandomWeights.current = true;
+  const restoreGrid = (isRestore = true) => {
+    timeOut.current.forEach((timer) => {
+      clearTimeout(timer);
+    });
+    setIsVisualising(false);
+    setIsMousePressed(false);
+    setIsPostVisualise(false);
+    resetVisitedNodeCSS();
+    randomWeights(grid, isRandomWeights.current, isRestore);
+  };
+
+  const randomWeights = (grid, isRandomWeightBool, isRestore = false) => {
+    isRandomWeights.current = isRandomWeightBool;
     const newGrid = [];
     const startNodeRow = startNode.current.row;
     const startNodeCol = startNode.current.col;
@@ -291,6 +307,7 @@ const App = () => {
               { row: finishNodeRow, col: finishNodeCol }
             )
           );
+          nodeRef.innerText = "";
           nodeRef.className = "node node-start";
         } else if (row === finishNodeRow && col === finishNodeCol) {
           currentRow.push(
@@ -303,6 +320,7 @@ const App = () => {
               { row: finishNodeRow, col: finishNodeCol }
             )
           );
+          nodeRef.innerText = "";
           nodeRef.className = "node node-finish";
         } else {
           currentRow.push(
@@ -310,7 +328,11 @@ const App = () => {
               row,
               col,
               grid[row][col].isWall,
-              Math.random() > 0.5 ? Math.ceil(Math.random() * 10) : 1,
+              isRestore
+                ? grid[row][col].displayWeight
+                : Math.random() > 0.5
+                ? Math.ceil(Math.random() * 10)
+                : 1,
               { row: startNodeRow, col: startNodeCol },
               { row: finishNodeRow, col: finishNodeCol }
             )
@@ -325,26 +347,42 @@ const App = () => {
 
   return (
     <div className="App">
-      <button onClick={() => resetGrid()}>Reset</button>
-      <button
-        disabled={isVisualising || isPostVisualise}
-        onClick={() => randomWeights(grid)}
+      <div
+        className="button-container"
+        style={{
+          margin: "3rem auto",
+        }}
       >
-        Random Weights
-      </button>
-      <button disabled={isVisualising} onClick={() => visualiseDijkstra()}>
-        Visualise Dijkstra's Algorithm
-      </button>
+        <Button type={"reset"} handleFunction={() => resetGrid()}></Button>
+        <Button
+          type={"restore"}
+          handleFunction={() => restoreGrid(grid)}
+          disable={!(isVisualising || isPostVisualise)}
+          disabledTitle={"Restores state before visualisation"}
+        ></Button>
+        <Button
+          type={"random-weights"}
+          handleFunction={() => randomWeights(grid, true)}
+          disable={isVisualising || isPostVisualise}
+          title={"Assigns random weights to each node"}
+          disabledTitle={"Can only reassign random weights on restore"}
+        ></Button>
+        <Button
+          type={"visualise"}
+          handleFunction={() => visualiseDijkstra()}
+          disable={isVisualising}
+        ></Button>
+      </div>
       <div
         className="grid"
         onMouseLeave={() => handleMouseLeaveForGrid()}
         style={{
-          margin: "100px auto",
+          margin: "auto",
           display: "grid",
-          gridTemplateColumns: `repeat(${NUM_COLUMNS}, ${NODE_PIXEL}px)`,
-          gridTemplateRows: `repeat(${NUM_ROWS}, ${NODE_PIXEL}px)`,
+          gridTemplateColumns: `repeat(${NUM_COLUMNS}, ${NODE_REM}rem)`,
+          gridTemplateRows: `repeat(${NUM_ROWS}, ${NODE_REM}rem)`,
           //makes the grid width relative to sum of all node pixels
-          width: `${NUM_COLUMNS * NODE_PIXEL}px`,
+          width: `${NUM_COLUMNS * NODE_REM}rem`,
           touchAction: "none",
         }}
       >

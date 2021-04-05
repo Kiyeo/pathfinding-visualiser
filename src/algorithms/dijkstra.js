@@ -4,11 +4,13 @@
 // by backtracking from the finish node.
 export function dijkstra(grid, startNode, finishNode, isRandomWeights) {
   finishNode.isVisited = false;
+  finishNode.isWall = false;
   const finishNodeNeighbours = getUnvisitedNeighbors(finishNode, grid);
   let finishNodeNeighbourVisits = 0;
   const visitedNodes = [];
   startNode.distance = 0;
   startNode.cumulativeWeight = 0;
+  startNode.isWall = false;
   const unvisitedNodes = getAllNodes(grid);
   // terminates when finishNode is reached
   while (true) {

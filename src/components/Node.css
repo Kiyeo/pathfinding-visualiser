@@ -1,12 +1,25 @@
-@import url(//db.onlinewebfonts.com/c/d08a067b981040590322dd2495d05893?family=Alcubierre);
+@font-face {
+  font-family: "Alcubierre";
+  src: url("//db.onlinewebfonts.com/t/d08a067b981040590322dd2495d05893.eot");
+  src: url("//db.onlinewebfonts.com/t/d08a067b981040590322dd2495d05893.eot?#iefix")
+      format("embedded-opentype"),
+    url("//db.onlinewebfonts.com/t/d08a067b981040590322dd2495d05893.woff2")
+      format("woff2"),
+    url("//db.onlinewebfonts.com/t/d08a067b981040590322dd2495d05893.woff")
+      format("woff"),
+    url("//db.onlinewebfonts.com/t/d08a067b981040590322dd2495d05893.ttf")
+      format("truetype"),
+    url("//db.onlinewebfonts.com/t/d08a067b981040590322dd2495d05893.svg#Alcubierre")
+      format("svg");
+}
 
 .node {
   font-family: Alcubierre;
-  font-size: 18px;
+  font-size: 1.5rem;
   touch-action: none;
   float: left;
-  width: 25px;
-  height: 25px;
+  width: 2rem;
+  height: 2rem;
   background-color: rgb(175, 216, 248);
   border: 1px solid white;
   user-select: none;
@@ -41,6 +54,7 @@
 
 .node-finish {
   background-color: red;
+  border: 0px;
 }
 
 .node-finish:hover {
