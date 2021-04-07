@@ -1,5 +1,6 @@
 import React, { forwardRef } from "react";
 import "./Node.css";
+import "../index.css";
 
 export default forwardRef((props, ref) => {
   const {

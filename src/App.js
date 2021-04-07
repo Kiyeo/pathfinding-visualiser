@@ -8,13 +8,13 @@ import {
 import "./App.css";
 
 const NUM_ROWS = 20;
-const NUM_COLUMNS = 50;
+const NUM_COLUMNS = Math.floor(window.innerWidth * 0.003) * 10;
 const NODE_REM = 2;
 
 const START_NODE_ROW = 10;
-const START_NODE_COL = 15;
+const START_NODE_COL = Math.floor(NUM_COLUMNS * 0.25);
 const FINISH_NODE_ROW = 10;
-const FINISH_NODE_COL = 35;
+const FINISH_NODE_COL = Math.floor(NUM_COLUMNS * 0.75);
 
 const App = () => {
   const startNode = useRef();
@@ -203,15 +203,22 @@ const App = () => {
 
   const animateShortestPath = (nodesInShortestPathOrder) => {
     let delay = 0;
-    for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
-      delay = i;
-      timeOut.current.push(
-        setTimeout(() => {
-          const node = nodesInShortestPathOrder[i];
-          nodeRefArray.current[`${node.row}-${node.col}`].className =
-            "node node-shortest-path";
-        }, 50 * i)
-      );
+    if (nodesInShortestPathOrder[0].isStart) {
+      for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
+        delay = i;
+        timeOut.current.push(
+          setTimeout(() => {
+            const node = nodesInShortestPathOrder[i];
+            nodeRefArray.current[`${node.row}-${node.col}`].className =
+              "node node-shortest-path";
+          }, 50 * i)
+        );
+      }
+    } else {
+      const startNodeRow = startNode.current.row;
+      const startNodeCol = startNode.current.col;
+      nodeRefArray.current[`${startNodeRow}-${startNodeCol}`].className =
+        "node node-start";
     }
     timeOut.current.push(
       setTimeout(() => {
@@ -222,6 +229,8 @@ const App = () => {
   };
 
   const visualiseDijkstra = () => {
+    console.log(window.innerHeight * 0.01);
+    console.log(window.innerWidth * 0.01);
     // resets css when resimulating
     if (isPostVisualise) resetVisitedNodeCSS();
     setIsVisualising(true);
@@ -350,88 +359,95 @@ const App = () => {
   };
 
   return (
-    <div className="App">
+    <>
       <div
-        className="button-container"
-        style={{
-          margin: "3rem auto",
-        }}
-      >
-        <Button type={"reset"} handleFunction={() => resetGrid()}></Button>
-        <Button
-          type={"restore"}
-          handleFunction={() => restoreGrid(grid)}
-          disable={!(isVisualising || isPostVisualise)}
-          disabledTitle={"Restores state before the visualisation"}
-        ></Button>
-        <Button
-          type={"random-weights"}
-          handleFunction={() => randomWeights(grid, true)}
-          disable={isVisualising || isPostVisualise}
-          title={"Assigns random weights to each node"}
-          disabledTitle={"Can only reassign random weights on restore"}
-        ></Button>
-        <Button
-          type={"visualise"}
-          handleFunction={() => visualiseDijkstra()}
-          disable={isVisualising}
-          isVisualising={isVisualising}
-          isPostVisualise={isPostVisualise}
-        ></Button>
+        className="galaxy-fold-open-your-device"
+        style={{ display: "none" }}
+      ></div>
+      <div className="App">
+        <div
+          className="button-container"
+          style={{
+            textAlign: "center",
+            margin: "3rem auto",
+          }}
+        >
+          <Button type={"reset"} handleFunction={() => resetGrid()}></Button>
+          <Button
+            type={"restore"}
+            handleFunction={() => restoreGrid(grid)}
+            disable={!(isVisualising || isPostVisualise)}
+            disabledTitle={"Restores state before the visualisation"}
+          ></Button>
+          <Button
+            type={"random-weights"}
+            handleFunction={() => randomWeights(grid, true)}
+            disable={isVisualising || isPostVisualise}
+            title={"Assigns random weights to each node"}
+            disabledTitle={"Can only reassign random weights on restore"}
+          ></Button>
+          <Button
+            type={"visualise"}
+            handleFunction={() => visualiseDijkstra()}
+            disable={isVisualising}
+            isVisualising={isVisualising}
+            isPostVisualise={isPostVisualise}
+          ></Button>
+        </div>
+        <div
+          className="grid"
+          onMouseLeave={() => handleMouseLeaveForGrid()}
+          style={{
+            margin: "auto",
+            display: "grid",
+            gridTemplateColumns: `repeat(${NUM_COLUMNS}, ${NODE_REM}rem)`,
+            gridTemplateRows: `repeat(${NUM_ROWS}, ${NODE_REM}rem)`,
+            //makes the grid width relative to sum of all node pixels
+            width: `${NUM_COLUMNS * NODE_REM}rem`,
+            touchAction: "none",
+          }}
+        >
+          {grid.map((row) =>
+            row.map((node) => {
+              const {
+                row,
+                col,
+                isWall,
+                isStart,
+                isFinish,
+                isVisited,
+                displayWeight,
+                cumulativeWeight,
+                isShowWeight,
+              } = node;
+              return (
+                <Node
+                  key={`${row}-${col}`}
+                  ref={(el) => (nodeRefArray.current[`${row}-${col}`] = el)}
+                  handleMouseDownForNode={(row, col) =>
+                    handleMouseDownForNode(row, col)
+                  }
+                  handleMouseEnterForNode={(row, col) =>
+                    handleMouseEnterForNode(row, col)
+                  }
+                  //handleTouchMoveForNode={(e) => handleTouchMoveForNode(e)}
+                  handleMouseUpForNode={() => handleMouseUpForNode()}
+                  row={row}
+                  col={col}
+                  isWall={isWall}
+                  isStart={isStart}
+                  isFinish={isFinish}
+                  isVisited={isVisited}
+                  displayWeight={displayWeight}
+                  cumulativeWeight={cumulativeWeight}
+                  isShowWeight={isShowWeight}
+                ></Node>
+              );
+            })
+          )}
+        </div>
       </div>
-      <div
-        className="grid"
-        onMouseLeave={() => handleMouseLeaveForGrid()}
-        style={{
-          margin: "auto",
-          display: "grid",
-          gridTemplateColumns: `repeat(${NUM_COLUMNS}, ${NODE_REM}rem)`,
-          gridTemplateRows: `repeat(${NUM_ROWS}, ${NODE_REM}rem)`,
-          //makes the grid width relative to sum of all node pixels
-          width: `${NUM_COLUMNS * NODE_REM}rem`,
-          touchAction: "none",
-        }}
-      >
-        {grid.map((row) =>
-          row.map((node) => {
-            const {
-              row,
-              col,
-              isWall,
-              isStart,
-              isFinish,
-              isVisited,
-              displayWeight,
-              cumulativeWeight,
-              isShowWeight,
-            } = node;
-            return (
-              <Node
-                key={`${row}-${col}`}
-                ref={(el) => (nodeRefArray.current[`${row}-${col}`] = el)}
-                handleMouseDownForNode={(row, col) =>
-                  handleMouseDownForNode(row, col)
-                }
-                handleMouseEnterForNode={(row, col) =>
-                  handleMouseEnterForNode(row, col)
-                }
-                //handleTouchMoveForNode={(e) => handleTouchMoveForNode(e)}
-                handleMouseUpForNode={() => handleMouseUpForNode()}
-                row={row}
-                col={col}
-                isWall={isWall}
-                isStart={isStart}
-                isFinish={isFinish}
-                isVisited={isVisited}
-                displayWeight={displayWeight}
-                cumulativeWeight={cumulativeWeight}
-                isShowWeight={isShowWeight}
-              ></Node>
-            );
-          })
-        )}
-      </div>
-    </div>
+    </>
   );
 };
 
