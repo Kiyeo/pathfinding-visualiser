@@ -8,6 +8,8 @@ import {
 import "./App.css";
 
 let NUM_ROWS;
+
+const SMALL_NUM_ROWS = 10;
 let NUM_COLUMNS;
 let NODE_REM;
 
@@ -74,10 +76,10 @@ const App = () => {
   useLayoutEffect(() => {
     function updateSize() {
       setTimeout(() => {
-        if (window.innerHeight > 340) {
+        if (window.innerHeight > 480) {
           NUM_ROWS = Math.floor(window.innerHeight * 0.003) * 10;
         } else {
-          NUM_ROWS = 10;
+          NUM_ROWS = SMALL_NUM_ROWS;
         }
         NUM_COLUMNS = Math.floor(window.innerWidth * 0.003) * 10;
         NODE_REM = 2;
@@ -90,9 +92,14 @@ const App = () => {
         setGrid(getInitialGrid());
       }, 500);
     }
-    window.addEventListener("resize", updateSize);
+    window.addEventListener("resize", () => {
+      if (window.innerHeight > 480) updateSize();
+    });
     updateSize();
-    return () => window.removeEventListener("resize", updateSize);
+    return () =>
+      window.removeEventListener("resize", () => {
+        if (window.innerHeight > 480) updateSize();
+      });
   }, [getInitialGrid]);
 
   const handleMouseDownForNode = (row, col) => {
