@@ -27,18 +27,12 @@ export default forwardRef((props, ref) => {
   return (
     <div
       id={`${row}-${col}`}
-      onPointerDown={() => {
-        handleMouseDownForNode(row, col);
-      }}
-      onPointerEnter={() => {
-        handleMouseEnterForNode(row, col);
-      }}
+      onPointerDown={() => handleMouseDownForNode(row, col)}
+      onPointerEnter={() => handleMouseEnterForNode(row, col)}
       //onTouchMove={(e) => {
       //  handleTouchMoveForNode(e);
       //}}
-      onPointerUp={() => {
-        handleMouseUpForNode();
-      }}
+      onPointerUp={() => handleMouseUpForNode()}
       onDragStart={(e) => {
         // Block drag default event
         e.preventDefault();

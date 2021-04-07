@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useLayoutEffect, useCallback, useRef } from "react";
 import Node from "./components/Node.jsx";
 import Button from "./components/Button.jsx";
 import {
@@ -7,20 +7,20 @@ import {
 } from "./algorithms/dijkstra.js";
 import "./App.css";
 
-const NUM_ROWS = 20;
-const NUM_COLUMNS = Math.floor(window.innerWidth * 0.003) * 10;
-const NODE_REM = 2;
+let NUM_ROWS;
+let NUM_COLUMNS;
+let NODE_REM;
 
-const START_NODE_ROW = 10;
-const START_NODE_COL = Math.floor(NUM_COLUMNS * 0.25);
-const FINISH_NODE_ROW = 10;
-const FINISH_NODE_COL = Math.floor(NUM_COLUMNS * 0.75);
+let START_NODE_ROW;
+let START_NODE_COL;
+let FINISH_NODE_ROW;
+let FINISH_NODE_COL;
 
 const App = () => {
   const startNode = useRef();
   const finishNode = useRef();
 
-  const getInitialGrid = () => {
+  const getInitialGrid = useCallback(() => {
     const grid = [];
     for (let row = 0; row < NUM_ROWS; row++) {
       const currentRow = [];
@@ -34,7 +34,7 @@ const App = () => {
       grid.push(currentRow);
     }
     return grid;
-  };
+  }, []);
 
   const createNode = (
     row,
@@ -70,6 +70,30 @@ const App = () => {
   const [isMousePressed, setIsMousePressed] = useState(false);
   const [isStartFinishNode, setIsNewStartNode] = useState(false);
   const [isNewFinishNode, setIsNewFinishNode] = useState(false);
+
+  useLayoutEffect(() => {
+    function updateSize() {
+      setTimeout(() => {
+        if (window.innerHeight > 340) {
+          NUM_ROWS = Math.floor(window.innerHeight * 0.003) * 10;
+        } else {
+          NUM_ROWS = 10;
+        }
+        NUM_COLUMNS = Math.floor(window.innerWidth * 0.003) * 10;
+        NODE_REM = 2;
+
+        START_NODE_ROW = Math.floor(NUM_ROWS * 0.5);
+        START_NODE_COL = Math.floor(NUM_COLUMNS * 0.25);
+        FINISH_NODE_ROW = Math.floor(NUM_ROWS * 0.5);
+        FINISH_NODE_COL = Math.floor(NUM_COLUMNS * 0.75);
+
+        setGrid(getInitialGrid());
+      }, 500);
+    }
+    window.addEventListener("resize", updateSize);
+    updateSize();
+    return () => window.removeEventListener("resize", updateSize);
+  }, [getInitialGrid]);
 
   const handleMouseDownForNode = (row, col) => {
     setIsMousePressed(true);
@@ -122,6 +146,10 @@ const App = () => {
     setIsMousePressed(false);
     setIsNewStartNode(false);
     setIsNewFinishNode(false);
+  };
+
+  const handleMouseUpForGrid = () => {
+    handleMouseUpForNode();
   };
 
   const handleMouseLeaveForGrid = () => {
@@ -229,8 +257,6 @@ const App = () => {
   };
 
   const visualiseDijkstra = () => {
-    console.log(window.innerHeight * 0.01);
-    console.log(window.innerWidth * 0.01);
     // resets css when resimulating
     if (isPostVisualise) resetVisitedNodeCSS();
     setIsVisualising(true);
@@ -369,7 +395,7 @@ const App = () => {
           className="button-container"
           style={{
             textAlign: "center",
-            margin: "3rem auto",
+            margin: "2rem auto",
           }}
         >
           <Button type={"reset"} handleFunction={() => resetGrid()}></Button>
@@ -396,15 +422,21 @@ const App = () => {
         </div>
         <div
           className="grid"
+          onMouseUp={() => handleMouseUpForGrid()}
           onMouseLeave={() => handleMouseLeaveForGrid()}
           style={{
             margin: "auto",
             display: "grid",
             gridTemplateColumns: `repeat(${NUM_COLUMNS}, ${NODE_REM}rem)`,
             gridTemplateRows: `repeat(${NUM_ROWS}, ${NODE_REM}rem)`,
+            gap: "1px",
             //makes the grid width relative to sum of all node pixels
             width: `${NUM_COLUMNS * NODE_REM}rem`,
             touchAction: "none",
+            fontFamily: "Alcubierre",
+            fontSize: "1rem",
+            color: "black",
+            cursor: "pointer",
           }}
         >
           {grid.map((row) =>

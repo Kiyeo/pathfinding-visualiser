@@ -1,16 +1,11 @@
 .node {
-  font-family: Alcubierre;
-  font-size: 1.5rem;
   touch-action: none;
-  text-align: center;
-  float: left;
-  width: 2rem;
-  height: 2rem;
-  background-color: rgb(175, 216, 248);
-  border: 1px solid white;
   user-select: none;
-  cursor: pointer;
-  color: black;
+  background-color: rgb(175, 216, 248);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  will-change: grid-template-columns, grid-template-rows;
 }
 
 .node-start {
@@ -106,6 +101,8 @@
   animation-direction: alternate;
   animation-fill-mode: forwards;
   background-color: rgba(16, 21, 95, 0.781);
+  /* half of a pixel */
+  margin: -0.03125rem -0.03125rem -0.03125rem -0.0315rem;
 }
 
 @keyframes setWall {
@@ -120,7 +117,6 @@
   }
   100% {
     transform: scale(1);
-    border: 0;
   }
 }
 

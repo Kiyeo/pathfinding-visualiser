@@ -1,3 +1,29 @@
+App {
+  text-align: center;
+}
+
+@media (max-width: 333px) {
+  .galaxy-fold-open-your-device {
+    display: block !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #fff;
+    z-index: 2147483647;
+  }
+
+  .galaxy-fold-open-your-device::after {
+    content: "Please turn your phone to landscape :D";
+    display: block;
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
 /*
  * Beautiful solution
  * https://r00t.io/managing-websites/a-way-to-fix-websites-for-samsung-galaxy-folds-280px-width-display/
