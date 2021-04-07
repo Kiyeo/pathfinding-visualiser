@@ -3,6 +3,7 @@
 # TODO / KNOWN BUGS
 
 Toggle button for weights
+After visualisation, reset css when resizing window
 
 # FIXED BUGS
 
