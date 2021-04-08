@@ -23,9 +23,9 @@ export default function Button(props) {
   const displayTitle =
     type === "restore" && disable
       ? disabledTitle
-      : type === "random-weights" && !disable
+      : type === "toggle-weights" && !disable
       ? title
-      : type === "random-weights" && disable
+      : type === "toggle-weights" && disable
       ? disabledTitle
       : "";
   const className = isVisualising

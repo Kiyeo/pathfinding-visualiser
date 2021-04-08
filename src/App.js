@@ -57,7 +57,7 @@ const App = () => {
       previousNode: null,
       displayWeight: cumulativeWeight,
       cumulativeWeight,
-      isShowWeight: false,
+      isShowCumulativeWeight: false,
     };
   };
 
@@ -67,11 +67,13 @@ const App = () => {
   const visitedNodeOrder = useRef([]);
   const nodeRefArray = useRef([]);
   const isResetting = useRef(false);
-  const isRandomWeights = useRef(false);
+  const isGenerateWeights = useRef(false);
   const timeOut = useRef([]);
   const [isMousePressed, setIsMousePressed] = useState(false);
   const [isStartFinishNode, setIsNewStartNode] = useState(false);
   const [isNewFinishNode, setIsNewFinishNode] = useState(false);
+  const toggleWeightHistory = useRef([]);
+  const isToggle = useRef(false);
 
   useLayoutEffect(() => {
     function updateSize() {
@@ -168,6 +170,8 @@ const App = () => {
     const prevNodeValues = newGrid[row][col];
     const wallNode = {
       ...prevNodeValues,
+      displayWeight: null,
+      isShowWeight: false,
       isWall: !prevNodeValues.isWall,
     };
     newGrid[row][col] = wallNode;
@@ -195,7 +199,7 @@ const App = () => {
       ...prevStartFinishNodeValues,
       displayWeight:
         prevStartFinishNodeValues.displayWeight === null &&
-        isRandomWeights.current
+        isGenerateWeights.current
           ? Math.ceil(Math.random() * 10)
           : prevStartFinishNodeValues.displayWeight,
       [type]: false,
@@ -228,7 +232,7 @@ const App = () => {
           const node = visitedNodeOrder[i];
           const nodeRef = nodeRefArray.current[`${node.row}-${node.col}`];
           // displays cumulative weight if in random weight simulation
-          if (isRandomWeights.current)
+          if (isGenerateWeights.current)
             nodeRef.innerText = `${node.cumulativeWeight}`;
           nodeRef.className = "node node-visited";
         }, 5 * i)
@@ -273,14 +277,14 @@ const App = () => {
       grid,
       nodeStart,
       nodeFinish,
-      isRandomWeights.current
+      isGenerateWeights.current
     );
     const nodesInShortestPathOrder = getNodesInShortestPathOrder(nodeFinish);
     animateDijkstra(visitedNodeOrder.current, nodesInShortestPathOrder);
   };
 
   const resetGrid = () => {
-    isRandomWeights.current = false;
+    isGenerateWeights.current = false;
     timeOut.current.forEach((timer) => {
       clearTimeout(timer);
     });
@@ -291,6 +295,7 @@ const App = () => {
     const initialGrid = getInitialGrid();
     setGrid(initialGrid);
     resetVisitedNodeCSS();
+    toggleWeightHistory.current = [];
   };
 
   const resetVisitedNodeCSS = () => {
@@ -310,7 +315,7 @@ const App = () => {
         nodeRef.innerText = "";
         nodeRef.className = "node node-finish";
       } else {
-        if ((isVisualising || isPostVisualise) && isRandomWeights.current) {
+        if ((isVisualising || isPostVisualise) && isGenerateWeights.current) {
           nodeRef.innerText = `${node.displayWeight}`;
         } else {
           nodeRef.innerText = "";
@@ -328,11 +333,10 @@ const App = () => {
     setIsMousePressed(false);
     setIsPostVisualise(false);
     resetVisitedNodeCSS();
-    randomWeights(grid, isRandomWeights.current, isRestore);
+    perserveGrid(grid, isRestore);
   };
 
-  const randomWeights = (grid, isRandomWeightBool, isRestore = false) => {
-    isRandomWeights.current = isRandomWeightBool;
+  const perserveGrid = (grid, isRestore) => {
     const newGrid = [];
     const startNodeRow = startNode.current.row;
     const startNodeCol = startNode.current.col;
@@ -369,13 +373,16 @@ const App = () => {
           nodeRef.innerText = "";
           nodeRef.className = "node node-finish";
         } else {
+          const currNode = grid[row][col];
           currentRow.push(
             createNode(
               row,
               col,
-              grid[row][col].isWall,
-              isRestore
-                ? grid[row][col].displayWeight
+              currNode.isWall,
+              currNode.isWall || isToggle.current
+                ? null
+                : isRestore
+                ? currNode.displayWeight
                 : Math.random() > 0.5
                 ? Math.ceil(Math.random() * 10)
                 : 1,
@@ -383,12 +390,86 @@ const App = () => {
               { row: finishNodeRow, col: finishNodeCol }
             )
           );
-          nodeRef.className = grid[row][col].isWall ? "node node-wall" : "node";
+          nodeRef.className = currNode.isWall ? "node node-wall" : "node";
         }
       }
       newGrid.push(currentRow);
     }
     setGrid(newGrid);
+    return newGrid;
+  };
+
+  const generateWeights = (grid, isToggleWeightBool, isRestore = false) => {
+    isGenerateWeights.current = isToggleWeightBool;
+    isToggle.current = false;
+    const newGrid = perserveGrid(grid, isRestore);
+    if (isGenerateWeights.current) {
+      toggleWeightHistory.current = newGrid;
+    }
+  };
+
+  const toggleWeights = () => {
+    isGenerateWeights.current = !isGenerateWeights.current;
+    isToggle.current = !isToggle.current;
+    if (isToggle.current) {
+      perserveGrid(grid, false);
+    } else {
+      const newGrid = [];
+      const startNodeRow = startNode.current.row;
+      const startNodeCol = startNode.current.col;
+      const finishNodeRow = finishNode.current.row;
+      const finishNodeCol = finishNode.current.col;
+      for (let row = 0; row < NUM_ROWS; row++) {
+        const currentRow = [];
+        for (let col = 0; col < NUM_COLUMNS; col++) {
+          const nodeRef = nodeRefArray.current[`${row}-${col}`];
+          if (row === startNodeRow && col === startNodeCol) {
+            currentRow.push(
+              createNode(
+                startNodeRow,
+                startNodeCol,
+                false,
+                null,
+                { row: startNodeRow, col: startNodeCol },
+                { row: finishNodeRow, col: finishNodeCol }
+              )
+            );
+            nodeRef.innerText = "";
+            nodeRef.className = "node node-start";
+          } else if (row === finishNodeRow && col === finishNodeCol) {
+            currentRow.push(
+              createNode(
+                finishNodeRow,
+                finishNodeCol,
+                false,
+                null,
+                { row: startNodeRow, col: startNodeCol },
+                { row: finishNodeRow, col: finishNodeCol }
+              )
+            );
+            nodeRef.innerText = "";
+            nodeRef.className = "node node-finish";
+          } else {
+            const currNode = toggleWeightHistory.current[row][col];
+            currentRow.push(
+              createNode(
+                row,
+                col,
+                currNode.isWall,
+                grid[row][col].isWall ? null : currNode.displayWeight,
+                { row: startNodeRow, col: startNodeCol },
+                { row: finishNodeRow, col: finishNodeCol }
+              )
+            );
+            nodeRef.className = grid[row][col].isWall
+              ? "node node-wall"
+              : "node";
+          }
+        }
+        newGrid.push(currentRow);
+      }
+      setGrid(newGrid);
+    }
   };
 
   return (
@@ -413,10 +494,19 @@ const App = () => {
             disabledTitle={"Restores state before the visualisation"}
           ></Button>
           <Button
-            type={"random-weights"}
-            handleFunction={() => randomWeights(grid, true)}
+            type={"toggle-weights"}
+            handleFunction={() => toggleWeights()}
+            disable={
+              !toggleWeightHistory.current.length ||
+              isVisualising ||
+              isPostVisualise
+            }
+          ></Button>
+          <Button
+            type={"generate-weights"}
+            handleFunction={() => generateWeights(grid, true)}
             disable={isVisualising || isPostVisualise}
-            title={"Assigns random weights to each node"}
+            title={"Generates random weights to each node. Click to toggle."}
             disabledTitle={"Can only reassign random weights on restore"}
           ></Button>
           <Button
@@ -457,7 +547,7 @@ const App = () => {
                 isVisited,
                 displayWeight,
                 cumulativeWeight,
-                isShowWeight,
+                isShowCumulativeWeight: isShowWeight,
               } = node;
               return (
                 <Node
