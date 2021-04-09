@@ -10,7 +10,7 @@
 
 .node-start {
   background-color: green;
-  border: 0px;
+  color: rgb(0, 0, 0, 0);
 }
 
 .node-start:hover {
@@ -35,7 +35,7 @@
 
 .node-finish {
   background-color: red;
-  border: 0px;
+  color: rgb(0, 0, 0, 0);
 }
 
 .node-finish:hover {
@@ -101,6 +101,8 @@
   animation-direction: alternate;
   animation-fill-mode: forwards;
   background-color: rgba(16, 21, 95, 0.781);
+  /* hides display weight */
+  color: rgba(0, 0, 0, 0);
   /* half of a pixel */
   margin: -0.03125rem -0.03125rem -0.03125rem -0.0315rem;
 }
@@ -129,7 +131,6 @@
   animation-iteration-count: 1;
   animation-fill-mode: forwards;
   animation-play-state: running;
-  color: black;
 }
 
 @keyframes visitedAnimation {

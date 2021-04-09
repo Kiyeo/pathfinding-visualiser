@@ -180,11 +180,7 @@ const App = () => {
     const prevNodeValues = newGrid[row][col];
     const wallNode = {
       ...prevNodeValues,
-      displayWeight: !(prevNodeValues.isWall && isGenerateWeights.current)
-        ? null
-        : Math.random() > 0.5
-        ? Math.ceil(Math.random() * 10)
-        : 1,
+      displayWeight: prevNodeValues.displayWeight,
       isShowWeight: false,
       isWall: !prevNodeValues.isWall,
     };
@@ -398,7 +394,7 @@ const App = () => {
                 row,
                 col,
                 currNode.isWall,
-                currNode.isWall || isToggle.current
+                isToggle.current
                   ? null
                   : isRestore
                   ? currNode.displayWeight
@@ -417,13 +413,7 @@ const App = () => {
                 row,
                 col,
                 grid[row][col].isWall,
-                grid[row][col].isWall
-                  ? null
-                  : !grid[row][col].isWall && currNode.displayWeight === null
-                  ? Math.random() > 0.5
-                    ? Math.ceil(Math.random() * 10)
-                    : 1
-                  : currNode.displayWeight,
+                currNode.displayWeight,
                 { row: startNodeRow, col: startNodeCol },
                 { row: finishNodeRow, col: finishNodeCol }
               )
@@ -510,6 +500,11 @@ const App = () => {
           className="grid"
           onPointerUp={() => handlePointerUpForGrid()}
           onMouseLeave={() => handleMouseLeaveForGrid()}
+          title={
+            isPostVisualise
+              ? "Click 'Restore' to adjust start, finish and wall nodes"
+              : undefined
+          }
           style={{
             margin: "auto",
             display: "grid",
@@ -526,7 +521,7 @@ const App = () => {
             fontFamily: "Alcubierre",
             fontSize: "1rem",
             color: "black",
-            cursor: "pointer",
+            cursor: isVisualising ? "progress" : "pointer",
           }}
         >
           {grid.map((row) =>
