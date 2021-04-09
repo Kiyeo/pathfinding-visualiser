@@ -2,6 +2,8 @@
 
 # TODO / KNOWN BUGS
 
+Implement ondrag on mobile touch screen for movement of start, finish nodes and toggle of wall nodes
+
 After visualisation, reset css when resizing window
 
 # FIXED BUGS
