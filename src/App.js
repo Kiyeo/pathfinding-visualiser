@@ -74,6 +74,7 @@ const App = () => {
   const [isNewFinishNode, setIsNewFinishNode] = useState(false);
   const toggleWeightHistory = useRef([]);
   const isToggle = useRef(false);
+  const recoverToggle = useRef(false);
 
   useLayoutEffect(() => {
     function updateSize() {
@@ -170,7 +171,11 @@ const App = () => {
     const prevNodeValues = newGrid[row][col];
     const wallNode = {
       ...prevNodeValues,
-      displayWeight: null,
+      displayWeight: !(prevNodeValues.isWall && isGenerateWeights.current)
+        ? null
+        : Math.random() > 0.5
+        ? Math.ceil(Math.random() * 10)
+        : 1,
       isShowWeight: false,
       isWall: !prevNodeValues.isWall,
     };
@@ -199,7 +204,8 @@ const App = () => {
       ...prevStartFinishNodeValues,
       displayWeight:
         prevStartFinishNodeValues.displayWeight === null &&
-        isGenerateWeights.current
+        isGenerateWeights.current &&
+        !prevStartFinishNodeValues.isWall
           ? Math.ceil(Math.random() * 10)
           : prevStartFinishNodeValues.displayWeight,
       [type]: false,
@@ -373,24 +379,47 @@ const App = () => {
           nodeRef.innerText = "";
           nodeRef.className = "node node-finish";
         } else {
-          const currNode = grid[row][col];
-          currentRow.push(
-            createNode(
-              row,
-              col,
-              currNode.isWall,
-              currNode.isWall || isToggle.current
-                ? null
-                : isRestore
-                ? currNode.displayWeight
-                : Math.random() > 0.5
-                ? Math.ceil(Math.random() * 10)
-                : 1,
-              { row: startNodeRow, col: startNodeCol },
-              { row: finishNodeRow, col: finishNodeCol }
-            )
-          );
-          nodeRef.className = currNode.isWall ? "node node-wall" : "node";
+          if (!recoverToggle.current) {
+            const currNode = grid[row][col];
+            currentRow.push(
+              createNode(
+                row,
+                col,
+                currNode.isWall,
+                currNode.isWall || isToggle.current
+                  ? null
+                  : isRestore
+                  ? currNode.displayWeight
+                  : Math.random() > 0.5
+                  ? Math.ceil(Math.random() * 10)
+                  : 1,
+                { row: startNodeRow, col: startNodeCol },
+                { row: finishNodeRow, col: finishNodeCol }
+              )
+            );
+            nodeRef.className = currNode.isWall ? "node node-wall" : "node";
+          } else {
+            const currNode = toggleWeightHistory.current[row][col];
+            currentRow.push(
+              createNode(
+                row,
+                col,
+                grid[row][col].isWall,
+                grid[row][col].isWall
+                  ? null
+                  : !grid[row][col].isWall && currNode.displayWeight === null
+                  ? Math.random() > 0.5
+                    ? Math.ceil(Math.random() * 10)
+                    : 1
+                  : currNode.displayWeight,
+                { row: startNodeRow, col: startNodeCol },
+                { row: finishNodeRow, col: finishNodeCol }
+              )
+            );
+            nodeRef.className = grid[row][col].isWall
+              ? "node node-wall"
+              : "node";
+          }
         }
       }
       newGrid.push(currentRow);
@@ -414,61 +443,9 @@ const App = () => {
     if (isToggle.current) {
       perserveGrid(grid, false);
     } else {
-      const newGrid = [];
-      const startNodeRow = startNode.current.row;
-      const startNodeCol = startNode.current.col;
-      const finishNodeRow = finishNode.current.row;
-      const finishNodeCol = finishNode.current.col;
-      for (let row = 0; row < NUM_ROWS; row++) {
-        const currentRow = [];
-        for (let col = 0; col < NUM_COLUMNS; col++) {
-          const nodeRef = nodeRefArray.current[`${row}-${col}`];
-          if (row === startNodeRow && col === startNodeCol) {
-            currentRow.push(
-              createNode(
-                startNodeRow,
-                startNodeCol,
-                false,
-                null,
-                { row: startNodeRow, col: startNodeCol },
-                { row: finishNodeRow, col: finishNodeCol }
-              )
-            );
-            nodeRef.innerText = "";
-            nodeRef.className = "node node-start";
-          } else if (row === finishNodeRow && col === finishNodeCol) {
-            currentRow.push(
-              createNode(
-                finishNodeRow,
-                finishNodeCol,
-                false,
-                null,
-                { row: startNodeRow, col: startNodeCol },
-                { row: finishNodeRow, col: finishNodeCol }
-              )
-            );
-            nodeRef.innerText = "";
-            nodeRef.className = "node node-finish";
-          } else {
-            const currNode = toggleWeightHistory.current[row][col];
-            currentRow.push(
-              createNode(
-                row,
-                col,
-                currNode.isWall,
-                grid[row][col].isWall ? null : currNode.displayWeight,
-                { row: startNodeRow, col: startNodeCol },
-                { row: finishNodeRow, col: finishNodeCol }
-              )
-            );
-            nodeRef.className = grid[row][col].isWall
-              ? "node node-wall"
-              : "node";
-          }
-        }
-        newGrid.push(currentRow);
-      }
-      setGrid(newGrid);
+      recoverToggle.current = true;
+      perserveGrid(grid, false);
+      recoverToggle.current = false;
     }
   };
 
