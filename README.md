@@ -1,5 +1,7 @@
 # pathfinding-visualiser
 
+YOU CAN NOW TRY ON MOBILE AS OF 10/04/2021
+
 # TODO / KNOWN BUGS
 
 After visualisation, reset css when resizing window
