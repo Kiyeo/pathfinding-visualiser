@@ -9,10 +9,10 @@ export default forwardRef((props, ref) => {
     isWall,
     isStart,
     isFinish,
-    handleMouseDownForNode,
-    handleMouseEnterForNode,
+    handlePointerDownForNode,
+    handlePointerEnterForNode,
     handleTouchMoveForNode,
-    handleMouseUpForNode,
+    handlePointerUpForNode,
     displayWeight,
     isShowWeight,
   } = props;
@@ -27,12 +27,10 @@ export default forwardRef((props, ref) => {
   return (
     <div
       id={`${row}-${col}`}
-      onPointerDown={() => handleMouseDownForNode(row, col)}
-      onPointerEnter={() => handleMouseEnterForNode(row, col)}
-      //onTouchMove={(e) => {
-      //  handleTouchMoveForNode(e);
-      //}}
-      onPointerUp={() => handleMouseUpForNode()}
+      onPointerDown={() => handlePointerDownForNode(row, col)}
+      onMouseEnter={() => handlePointerEnterForNode(row, col)}
+      onTouchMove={(e) => handleTouchMoveForNode(e)}
+      onPointerUp={() => handlePointerUpForNode()}
       onDragStart={(e) => {
         // Block drag default event
         e.preventDefault();

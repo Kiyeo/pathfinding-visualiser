@@ -70,7 +70,7 @@ const App = () => {
   const isGenerateWeights = useRef(false);
   const timeOut = useRef([]);
   const [isMousePressed, setIsMousePressed] = useState(false);
-  const [isStartFinishNode, setIsNewStartNode] = useState(false);
+  const [isNewStartNode, setIsNewStartNode] = useState(false);
   const [isNewFinishNode, setIsNewFinishNode] = useState(false);
   const toggleWeightHistory = useRef([]);
   const isToggle = useRef(false);
@@ -105,65 +105,74 @@ const App = () => {
       });
   }, [getInitialGrid]);
 
-  const handleMouseDownForNode = (row, col) => {
+  const handlePointerDownForNode = (row, col) => {
     setIsMousePressed(true);
-    if (
-      row === startNode.current.row &&
-      col === startNode.current.col &&
-      !isVisualising &&
-      !isPostVisualise
-    ) {
+    const isStartRef =
+      row === startNode.current.row && col === startNode.current.col;
+
+    const isFinishRef =
+      row === finishNode.current.row && col === finishNode.current.col;
+
+    const isNotVisualisation = !isVisualising && !isPostVisualise;
+
+    if (isStartRef && isNotVisualisation) {
       setIsNewStartNode(true);
-    } else if (
-      row === finishNode.current.row &&
-      col === finishNode.current.col &&
-      !isVisualising &&
-      !isPostVisualise
-    ) {
+    } else if (isFinishRef && isNotVisualisation) {
       setIsNewFinishNode(true);
-    } else if (!isVisualising && !isPostVisualise) setWall(grid, row, col);
+    } else if (isNotVisualisation) setWall(grid, row, col);
   };
 
-  const handleMouseEnterForNode = (row, col) => {
+  const handlePointerEnterForNode = (row, col) => {
     if (!isMousePressed && !isVisualising) return;
-    if (
-      isStartFinishNode &&
-      !(row === finishNode.current.row && col === finishNode.current.col) //&&
-      //!grid[row][col].isWall
-    ) {
+
+    const isStartRef =
+      row === startNode.current.row && col === startNode.current.col;
+
+    const isFinishRef =
+      row === finishNode.current.row && col === finishNode.current.col;
+
+    const isNotStartFinishRef = !isStartRef && !isFinishRef;
+
+    if (isNewStartNode && isNotStartFinishRef) {
       setNewStartOrFinishNode(grid, row, col);
-    } else if (
-      isNewFinishNode &&
-      !(row === startNode.current.row && col === startNode.current.col) //&&
-      //!grid[row][col].isWall
-    ) {
+    } else if (isNewFinishNode && isNotStartFinishRef) {
       setNewStartOrFinishNode(grid, row, col);
-    } else if (!isVisualising && !isPostVisualise) setWall(grid, row, col);
+    } else if (!isVisualising && !isPostVisualise && isNotStartFinishRef)
+      setWall(grid, row, col);
   };
 
-  //const handleTouchMoveForNode = (e) => {
-  //  if (!isMousePressed && !isVisualising) return;
-  //  const x = e.touches[0].clientX;
-  //  const y = e.touches[0].clientY;
-  //  const element = document.elementFromPoint(x, y);
-  //  const rowAndCol = element.id.split("-");
-  //  const row = rowAndCol[0];
-  //  const col = rowAndCol[1];
-  //  handleMouseEnterForNode(row, col);
-  //};
+  // stops touch move from setting the same element multiple times
+  const [touchElement, setTouchElement] = useState(null);
 
-  const handleMouseUpForNode = () => {
+  const handlePointerMoveForNode = (e, isMouse) => {
+    const x = isMouse ? e.clientX : e.touches[0].clientX;
+    const y = isMouse ? e.clientY : e.touches[0].clientY;
+
+    const element = document.elementFromPoint(x, y);
+    const rowAndCol = element.id.split("-");
+
+    const row = Number(rowAndCol[0]);
+    const col = Number(rowAndCol[1]);
+
+    if (element.classList.contains("node") && touchElement !== element) {
+      setTouchElement(element);
+      handlePointerEnterForNode(row, col);
+    }
+    return;
+  };
+
+  const handlePointerUpForNode = () => {
     setIsMousePressed(false);
     setIsNewStartNode(false);
     setIsNewFinishNode(false);
   };
 
-  const handleMouseUpForGrid = () => {
-    handleMouseUpForNode();
+  const handlePointerUpForGrid = () => {
+    handlePointerUpForNode();
   };
 
   const handleMouseLeaveForGrid = () => {
-    handleMouseUpForNode();
+    window.addEventListener("mouseup", () => handlePointerUpForNode());
   };
 
   const setWall = (grid, row, col) => {
@@ -187,11 +196,11 @@ const App = () => {
     const newGrid = grid.slice();
     // keep the new start or finish nodes previous (json) values
     const prevNodeValues = newGrid[row][col];
-    const currentStartFinishNode = isStartFinishNode
+    const currentStartFinishNode = isNewStartNode
       ? startNode.current
       : finishNode.current;
     // only change the type of the start or finish node
-    const type = isStartFinishNode ? "isStart" : "isFinish";
+    const type = isNewStartNode ? "isStart" : "isFinish";
     const newStartFinishNode = {
       ...prevNodeValues,
       isWall: prevNodeValues.isWall,
@@ -215,7 +224,7 @@ const App = () => {
       currentStartFinishNode.col
     ] = prevStartFinishNode;
     // update start or finish node reference
-    if (isStartFinishNode) {
+    if (isNewStartNode) {
       startNode.current = { row, col };
     } else {
       finishNode.current = { row, col };
@@ -308,12 +317,15 @@ const App = () => {
     const nodeStart = isPostVisualise
       ? startNode.current
       : { row: START_NODE_ROW, col: START_NODE_COL };
+
     const nodeFinish = isPostVisualise
       ? finishNode.current
       : { row: FINISH_NODE_ROW, col: FINISH_NODE_COL };
+
     for (let i = 0; i < visitedNodeOrder.current.length; i++) {
       const node = visitedNodeOrder.current[i];
       const nodeRef = nodeRefArray.current[`${node.row}-${node.col}`];
+
       if (node.row === nodeStart.row && node.col === nodeStart.col) {
         nodeRef.innerText = "";
         nodeRef.className = "node node-start";
@@ -496,16 +508,20 @@ const App = () => {
         </div>
         <div
           className="grid"
-          onMouseUp={() => handleMouseUpForGrid()}
+          onPointerUp={() => handlePointerUpForGrid()}
           onMouseLeave={() => handleMouseLeaveForGrid()}
           style={{
             margin: "auto",
             display: "grid",
+
             gridTemplateColumns: `repeat(${NUM_COLUMNS}, ${NODE_REM}rem)`,
             gridTemplateRows: `repeat(${NUM_ROWS}, ${NODE_REM}rem)`,
             gap: "1px",
             //makes the grid width relative to sum of all node pixels
-            width: `${NUM_COLUMNS * NODE_REM}rem`,
+            // 1px === 0.06rem. NUM_COLUMNS * 0.06 is to account for the gap of 1px
+            width: `${
+              NUM_COLUMNS * NODE_REM + (NUM_COLUMNS + NUM_ROWS) * 0.06
+            }rem`,
             touchAction: "none",
             fontFamily: "Alcubierre",
             fontSize: "1rem",
@@ -530,14 +546,16 @@ const App = () => {
                 <Node
                   key={`${row}-${col}`}
                   ref={(el) => (nodeRefArray.current[`${row}-${col}`] = el)}
-                  handleMouseDownForNode={(row, col) =>
-                    handleMouseDownForNode(row, col)
+                  handlePointerDownForNode={(row, col) =>
+                    handlePointerDownForNode(row, col)
                   }
-                  handleMouseEnterForNode={(row, col) =>
-                    handleMouseEnterForNode(row, col)
+                  handlePointerEnterForNode={(row, col) =>
+                    handlePointerEnterForNode(row, col)
                   }
-                  //handleTouchMoveForNode={(e) => handleTouchMoveForNode(e)}
-                  handleMouseUpForNode={() => handleMouseUpForNode()}
+                  handleTouchMoveForNode={(e) =>
+                    handlePointerMoveForNode(e, false)
+                  }
+                  handlePointerUpForNode={() => handlePointerUpForNode()}
                   row={row}
                   col={col}
                   isWall={isWall}
