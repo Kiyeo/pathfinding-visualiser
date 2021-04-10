@@ -1,6 +1,17 @@
 .App {
   text-align: center;
 }
+.button-container {
+  text-align: center;
+  margin: 2rem auto;
+}
+
+@media (max-width: 1080px) {
+  .App {
+    display: flex;
+    flex-direction: column-reverse;
+  }
+}
 
 @media (max-width: 333px) {
   .galaxy-fold-open-your-device {

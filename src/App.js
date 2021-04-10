@@ -448,13 +448,7 @@ const App = () => {
         style={{ display: "none" }}
       ></div>
       <div className="App">
-        <div
-          className="button-container"
-          style={{
-            textAlign: "center",
-            margin: "2rem auto",
-          }}
-        >
+        <div className="button-container">
           <Button type={"reset"} handleFunction={() => resetGrid()}></Button>
           <Button
             type={"restore"}
@@ -498,15 +492,14 @@ const App = () => {
           style={{
             margin: "auto",
             display: "grid",
+            marginTop: "1rem",
 
             gridTemplateColumns: `repeat(${NUM_COLUMNS}, ${NODE_REM}rem)`,
             gridTemplateRows: `repeat(${NUM_ROWS}, ${NODE_REM}rem)`,
             gap: "1px",
             //makes the grid width relative to sum of all node pixels
             // 1px === 0.06rem. NUM_COLUMNS * 0.06 is to account for the gap of 1px
-            width: `${
-              NUM_COLUMNS * NODE_REM + (NUM_COLUMNS + NUM_ROWS) * 0.06
-            }rem`,
+            width: `${NUM_COLUMNS * NODE_REM + NUM_COLUMNS * 0.06}rem`,
             touchAction: "none",
             fontFamily: "Alcubierre",
             fontSize: "1rem",
