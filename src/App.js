@@ -79,8 +79,9 @@ const App = () => {
   useLayoutEffect(() => {
     function updateSize() {
       setTimeout(() => {
-        if (window.innerHeight > 480) {
+        if (window.innerHeight > 500) {
           NUM_ROWS = Math.floor(window.innerHeight * 0.003) * 10;
+          if (NUM_ROWS === 10) NUM_ROWS = NUM_ROWS + 5;
         } else {
           NUM_ROWS = SMALL_NUM_ROWS;
         }
