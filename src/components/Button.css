@@ -9,12 +9,9 @@ button {
   color: white;
 }
 
-/*
- * May change focus later
- * https://developer.mozilla.org/en-US/docs/Learn/Accessibility/What_is_accessibility
- */
 button:focus {
   outline: none;
+  box-shadow: 0 0 0 3px white, 0 0 0 6px rgba(0, 211, 158, 0.8);
 }
 
 button:active {
@@ -24,6 +21,9 @@ button:active {
 button:disabled {
   background: #dddddd !important;
   cursor: help;
+}
+button:disabled:focus {
+  box-shadow: 0 0 0 3px white, 0 0 0 6px #dddddd;
 }
 
 button:hover {
@@ -36,12 +36,20 @@ button:hover {
   background: rgb(230, 0, 0, 0.9);
 }
 
+.reset:focus {
+  box-shadow: 0 0 0 3px white, 0 0 0 6px rgb(230, 0, 0, 0.9);
+}
+
 .reset:hover {
   background: rgb(250, 40, 40, 1);
 }
 
 .restore {
   background: rgb(236, 165, 43, 0.9);
+}
+
+.restore:focus {
+  box-shadow: 0 0 0 3px white, 0 0 0 6px rgb(236, 165, 43, 0.9);
 }
 
 .restore:hover {
