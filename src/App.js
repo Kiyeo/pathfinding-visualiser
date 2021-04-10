@@ -74,7 +74,7 @@ const App = () => {
   const [isNewFinishNode, setIsNewFinishNode] = useState(false);
   const toggleWeightHistory = useRef([]);
   const isToggle = useRef(false);
-  const recoverToggle = useRef(false);
+  const isRecoverToggle = useRef(false);
 
   useLayoutEffect(() => {
     function updateSize() {
@@ -371,6 +371,7 @@ const App = () => {
               { row: finishNodeRow, col: finishNodeCol }
             )
           );
+
           nodeRef.innerText = "";
           nodeRef.className = "node node-start";
         } else if (row === finishNodeRow && col === finishNodeCol) {
@@ -384,44 +385,33 @@ const App = () => {
               { row: finishNodeRow, col: finishNodeCol }
             )
           );
+
           nodeRef.innerText = "";
           nodeRef.className = "node node-finish";
         } else {
-          if (!recoverToggle.current) {
-            const currNode = grid[row][col];
-            currentRow.push(
-              createNode(
-                row,
-                col,
-                currNode.isWall,
-                isToggle.current
-                  ? null
-                  : isRestore
-                  ? currNode.displayWeight
-                  : Math.random() > 0.5
-                  ? Math.ceil(Math.random() * 10)
-                  : 1,
-                { row: startNodeRow, col: startNodeCol },
-                { row: finishNodeRow, col: finishNodeCol }
-              )
-            );
-            nodeRef.className = currNode.isWall ? "node node-wall" : "node";
-          } else {
-            const currNode = toggleWeightHistory.current[row][col];
-            currentRow.push(
-              createNode(
-                row,
-                col,
-                grid[row][col].isWall,
-                currNode.displayWeight,
-                { row: startNodeRow, col: startNodeCol },
-                { row: finishNodeRow, col: finishNodeCol }
-              )
-            );
-            nodeRef.className = grid[row][col].isWall
-              ? "node node-wall"
-              : "node";
-          }
+          const currNode = grid[row][col];
+
+          const displayWeight = isRecoverToggle.current
+            ? toggleWeightHistory.current[row][col].displayWeight
+            : isToggle.current
+            ? null
+            : isRestore
+            ? currNode.displayWeight
+            : Math.random() > 0.5
+            ? Math.ceil(Math.random() * 10)
+            : 1;
+
+          currentRow.push(
+            createNode(
+              row,
+              col,
+              currNode.isWall,
+              displayWeight,
+              { row: startNodeRow, col: startNodeCol },
+              { row: finishNodeRow, col: finishNodeCol }
+            )
+          );
+          nodeRef.className = currNode.isWall ? "node node-wall" : "node";
         }
       }
       newGrid.push(currentRow);
@@ -445,9 +435,9 @@ const App = () => {
     if (isToggle.current) {
       perserveGrid(grid, false);
     } else {
-      recoverToggle.current = true;
+      isRecoverToggle.current = true;
       perserveGrid(grid, false);
-      recoverToggle.current = false;
+      isRecoverToggle.current = false;
     }
   };
 
