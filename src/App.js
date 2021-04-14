@@ -200,26 +200,35 @@ const App = () => {
     const type = isNewStartNode ? "isStart" : "isFinish";
     const newStartFinishNode = {
       ...prevNodeValues,
-      isWall: prevNodeValues.isWall,
       [type]: true,
     };
     const prevStartFinishNodeValues =
       newGrid[currentStartFinishNode.row][currentStartFinishNode.col];
+
+    const displayWeight =
+      prevStartFinishNodeValues.displayWeight === null &&
+      isGenerateWeights.current &&
+      !prevStartFinishNodeValues.isWall
+        ? Math.ceil(Math.random() * 10)
+        : prevStartFinishNodeValues.displayWeight;
+
     // change the old start or finish node type to false
     const prevStartFinishNode = {
       ...prevStartFinishNodeValues,
-      displayWeight:
-        prevStartFinishNodeValues.displayWeight === null &&
-        isGenerateWeights.current &&
-        !prevStartFinishNodeValues.isWall
-          ? Math.ceil(Math.random() * 10)
-          : prevStartFinishNodeValues.displayWeight,
+      displayWeight: displayWeight,
       [type]: false,
     };
     newGrid[row][col] = newStartFinishNode;
     newGrid[currentStartFinishNode.row][
       currentStartFinishNode.col
     ] = prevStartFinishNode;
+
+    if (isGenerateWeights.current) {
+      toggleWeightHistory.current[currentStartFinishNode.row][
+        currentStartFinishNode.col
+      ] = prevStartFinishNode;
+    }
+
     // update start or finish node reference
     if (isNewStartNode) {
       startNode.current = { row, col };
