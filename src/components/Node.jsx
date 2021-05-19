@@ -27,7 +27,7 @@ export default forwardRef((props, ref) => {
   return (
     <div
       id={`${row}-${col}`}
-      onPointerDown={() => handlePointerDownForNode(row, col)}
+      onPointerDown={() => handlePointerDownForNode()}
       onMouseEnter={() => handlePointerEnterForNode(row, col)}
       onTouchMove={(e) => handleTouchMoveForNode(e)}
       onPointerUp={() => handlePointerUpForNode()}
