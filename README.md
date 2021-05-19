@@ -4,10 +4,6 @@ YOU CAN NOW TRY ON MOBILE AS OF 10/04/2021
 
 # TODO / KNOWN BUGS
 
-After visualisation, reset css when resizing window
-
-Add A* search algorithm
-
 Move buttons below grid when on mobile 10/04/2021
 
 Implement ondrag on mobile touch screen for movement of start, finish nodes and toggle of wall nodes 10/04/2021
