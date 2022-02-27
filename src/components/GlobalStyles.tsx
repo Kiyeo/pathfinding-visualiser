@@ -11,11 +11,18 @@ export default createGlobalStyle<{ theme: Theme }>`
   }
 
   html,
-  body {
+  body,
+  #root {
+    height: 100%;
     font-family: montserrat;
-      background-color: ${(p) => p.theme.backgroundColor};
-      color: ${(p) => p.theme.color};
-      transition: background-color 1s ease-in, color 1s ease-in;
+    background-color: ${(p) => p.theme.backgroundColor};
+    color: ${(p) => p.theme.color};
+  }
+
+  #root {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   h1, h2, h3 {

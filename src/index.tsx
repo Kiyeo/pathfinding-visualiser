@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom";
-import { ThemeProvider } from "styled-components";
+import styled, { ThemeProvider } from "styled-components";
 import GlobalStyles from "./components/GlobalStyles";
+import Grid from "./components/Grid";
 import Theme from "./theme";
 
 import("algorithms").then((m) => {
@@ -20,12 +21,13 @@ import("algorithms").then((m) => {
       hoverAccent: "hsl(0, 0%, 45%)",
     };
 
-    m.greet("leo");
+    //m.greet("leo");
 
     const [theme, setTheme] = useState(darkTheme);
     return (
       <ThemeProvider theme={theme}>
         <GlobalStyles />
+        <Grid />
       </ThemeProvider>
     );
   };
