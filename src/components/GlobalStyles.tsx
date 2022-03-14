@@ -23,6 +23,7 @@ export default createGlobalStyle<{ theme: Theme }>`
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
   }
 
   h1, h2, h3 {

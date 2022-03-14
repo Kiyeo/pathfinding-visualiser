@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom";
-import styled, { ThemeProvider } from "styled-components";
+import { ThemeProvider } from "styled-components";
+import ButtonGroup from "./components/ButtonGroup";
 import GlobalStyles from "./components/GlobalStyles";
 import Grid from "./components/Grid";
 import Theme from "./theme";
@@ -27,6 +28,7 @@ import("algorithms").then((m) => {
     return (
       <ThemeProvider theme={theme}>
         <GlobalStyles />
+        <ButtonGroup />
         <Grid />
       </ThemeProvider>
     );
