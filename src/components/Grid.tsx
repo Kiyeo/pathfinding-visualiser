@@ -1,11 +1,8 @@
-import React, { useState } from "react";
+import React, { useContext } from "react";
 import styled from "styled-components";
 import Node from "./Node";
-
-interface GridDimensions {
-  rows: number;
-  columns: number;
-}
+import GridDimensions from "../griddimensions";
+import { GridContext } from "../contexts/GridContext";
 
 const Grid = styled.div<GridDimensions>`
   display: grid;
@@ -20,20 +17,11 @@ const Grid = styled.div<GridDimensions>`
 `;
 
 export default () => {
-  const gridDimensions: GridDimensions = {
-    rows: 25,
-    columns: 50,
-  };
-  const [grid, _] = useState(
-    Array.from({ length: gridDimensions.rows }).map(() =>
-      Array.from({ length: gridDimensions.columns }).fill(0)
-    )
-  );
-
+  const { grid, gridDimensions }: any = useContext(GridContext);
   return (
     <Grid rows={gridDimensions.rows} columns={gridDimensions.columns}>
-      {grid.map((rows, rowIndex) =>
-        rows.map((_, colIndex) => <Node key={`${rowIndex}-${colIndex}`} />)
+      {grid.map((rows: any, rowIndex: any) =>
+        rows.map((_: any, colIndex: any) => <Node key={`${rowIndex}-${colIndex}`} >{grid[rowIndex][colIndex]}</Node>)
       )}
     </Grid>
   );

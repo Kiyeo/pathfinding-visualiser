@@ -13,5 +13,6 @@ const Button = styled.button`
 `;
 
 export default (props: any) => {
-  return <Button>{props.children}</Button>;
+
+  return <Button onClick={() => props.handleOnClick()}>{props.children}</Button>;
 };

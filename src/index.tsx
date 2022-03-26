@@ -5,6 +5,8 @@ import ButtonGroup from "./components/ButtonGroup";
 import GlobalStyles from "./components/GlobalStyles";
 import Grid from "./components/Grid";
 import Theme from "./theme";
+import { GridContext } from "./contexts/GridContext";
+import GridDimensions from "./griddimensions";
 
 import("algorithms").then((m) => {
   const App = () => {
@@ -25,11 +27,25 @@ import("algorithms").then((m) => {
     //m.greet("leo");
 
     const [theme, setTheme] = useState(darkTheme);
+    const gridDimensions: GridDimensions = {
+      rows: 25,
+      columns: 50,
+    };
+    const [grid, setGrid] = useState(() =>
+      Array.from({ length: gridDimensions.rows }).map(() =>
+        Array.from({ length: gridDimensions.columns }).fill(0)
+      )
+    );
+    const [gridHistory, setGridHistory] = useState(grid);
+
+
     return (
       <ThemeProvider theme={theme}>
         <GlobalStyles />
-        <ButtonGroup />
-        <Grid />
+        <GridContext.Provider value={{ grid, setGrid, gridDimensions }}>
+          <ButtonGroup />
+          <Grid />
+        </GridContext.Provider>
       </ThemeProvider>
     );
   };
