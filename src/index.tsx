@@ -7,6 +7,7 @@ import Grid from "./components/Grid";
 import Theme from "./theme";
 import { GridContext } from "./contexts/GridContext";
 import GridDimensions from "./griddimensions";
+import NodeType from "./node";
 
 import("algorithms").then((m) => {
   const App = () => {
@@ -31,10 +32,16 @@ import("algorithms").then((m) => {
       rows: 25,
       columns: 50,
     };
-    const [grid, setGrid] = useState(() =>
+    const [grid, setGrid] = useState<NodeType[][]>(() =>
       Array.from({ length: gridDimensions.rows }).map(() =>
-        Array.from({ length: gridDimensions.columns }).fill(0)
-      )
+        Array.from({ length: gridDimensions.columns }, () =>
+        (
+          {
+            weight: Math.ceil(Math.random() * 10),
+            isStart: false,
+            isFinish: false,
+          }
+        )))
     );
     const [gridHistory, setGridHistory] = useState(grid);
 

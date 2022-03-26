@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import styled from "styled-components";
 import Node from "./Node";
+import NodeType from "../node";
 import GridDimensions from "../griddimensions";
 import { GridContext } from "../contexts/GridContext";
 
@@ -21,7 +22,7 @@ export default () => {
   return (
     <Grid rows={gridDimensions.rows} columns={gridDimensions.columns}>
       {grid.map((rows: any, rowIndex: any) =>
-        rows.map((_: any, colIndex: any) => <Node key={`${rowIndex}-${colIndex}`} >{grid[rowIndex][colIndex]}</Node>)
+        rows.map((node: NodeType, colIndex: any) => <Node key={`${rowIndex}-${colIndex}`} >{node.weight}</Node>)
       )}
     </Grid>
   );

@@ -6,20 +6,23 @@ import { GridContext } from "../contexts/GridContext";
 const ButtonGroup = styled.nav``;
 
 export default () => {
-  const { grid, setGrid, gridDimensions }: any = useContext(GridContext);
+  const { setGrid, gridDimensions }: any = useContext(GridContext);
 
-  const handleGenerateWeights = (grid: any, setGrid: any) => {
-    setGrid(() => {
-      const rows = []
-      for (let i = 0; i < gridDimensions.rows; i++) {
-        rows.push(Array.from(Array(gridDimensions.columns), () => Math.ceil(Math.random() * 10)))
-      }
-      return rows;
-    })
+  const handleGenerateWeights = (setGrid: any) => {
+    setGrid(() =>
+      Array.from({ length: gridDimensions.rows }).map(() =>
+        Array.from({ length: gridDimensions.columns }, () =>
+        (
+          {
+            weight: Math.ceil(Math.random() * 10),
+            isStart: false,
+            isFinish: false,
+          }
+        ))));
   }
   return (
     <ButtonGroup>
-      <Button handleOnClick={() => handleGenerateWeights(grid, setGrid)} >Generate Weight</Button>
+      <Button handleOnClick={() => handleGenerateWeights(setGrid)} >Generate Weight</Button>
     </ButtonGroup>
   );
 };
