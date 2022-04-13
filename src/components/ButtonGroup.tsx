@@ -2,21 +2,22 @@ import React, { useContext } from "react";
 import styled from "styled-components";
 import Button from "./Button";
 import { GridContext } from "../contexts/GridContext";
+import INode from "../@types/node";
+import { GridContextType } from "../@types/gridContextType";
 
 const ButtonGroup = styled.nav``;
 
 export default () => {
-  const { setGrid, gridDimensions }: any = useContext(GridContext);
+  const { grid, setGrid, gridDimensions, startNode, finishNode } = useContext(GridContext) as GridContextType;
 
-  const handleGenerateWeights = (setGrid: any) => {
+  const handleGenerateWeights = (setGrid: React.Dispatch<React.SetStateAction<INode[][]>>) => {
     setGrid(() =>
-      Array.from({ length: gridDimensions.rows }).map(() =>
-        Array.from({ length: gridDimensions.columns }, () =>
+      Array.from({ length: gridDimensions.rows }).map((_, row) =>
+        Array.from({ length: gridDimensions.columns }, (_, col): INode =>
         (
           {
-            weight: Math.ceil(Math.random() * 10),
-            isStart: false,
-            isFinish: false,
+            ...grid[row][col],
+            weight: Math.ceil(Math.random() * 10)
           }
         ))));
   }
