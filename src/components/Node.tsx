@@ -17,10 +17,10 @@ export default (props: any) => {
   const { node, handleMouseEvent } = props;
   return <Node
     id={`${node.row} ${node.col}`}
-    onPointerDown={(e) => handleMouseEvent(e)}
-    onPointerUp={(e) => handleMouseEvent(e)}
-    onMouseEnter={(e) => handleMouseEvent(e)}
-    onTouchMove={(e) => handleMouseEvent(e)}
+    onPointerDown={() => handleMouseEvent()}
+    onPointerUp={() => handleMouseEvent()}
+    onMouseEnter={() => handleMouseEvent()}
+    onTouchMove={() => handleMouseEvent()}
     onDragStart={(e) => {
       // Block drag default event
       e.preventDefault();

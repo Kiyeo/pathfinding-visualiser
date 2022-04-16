@@ -73,7 +73,7 @@ const App = () => {
   );
   const [gridHistory, setGridHistory] = useState(grid);
 
-  rustAlgorithms(grid, startNode.current!)
+  rustAlgorithms(grid, startNode.current)
 
   return (
     <ThemeProvider theme={theme}>
