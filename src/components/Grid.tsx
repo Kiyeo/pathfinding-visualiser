@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import styled from "styled-components";
-import Node from "./Node";
-import INode from "../@types/node";
+import Node from "./Vertex";
+import INode from "../@types/vertex";
 import IGridDimensions from "../@types/gridDimensions";
 import { GridContext } from "../contexts/GridContext";
 import { GridContextType } from "../@types/gridContextType";

@@ -1,5 +1,5 @@
-import React, { useRef, useState } from "react";
-import ReactDOM from "react-dom";
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createRoot } from "react-dom/client";
 import { ThemeProvider } from "styled-components";
 import ButtonGroup from "./components/ButtonGroup";
 import GlobalStyles from "./components/GlobalStyles";
@@ -7,13 +7,20 @@ import Grid from "./components/Grid";
 import Theme from "./@types/theme";
 import { GridContext } from "./contexts/GridContext";
 import IGridDimensions from "./@types/gridDimensions";
-import INode from "./@types/node";
-import NodeType from "./NodeType";
+import IVertex from "./@types/vertex";
+import VertexType from "./VertexType";
+import Graph from "./components/Graph";
+import useGraph from "./hooks/useGraph";
+import { GraphContext } from "./contexts/GraphContext";
+import { GraphContextType } from "./@types/graphContextType";
 
-const rustAlgorithms = async (grid: INode[][], source: INode): Promise<void> => {
-  const algorithms = await import("algorithms");
-  console.log(algorithms.dijkstra(grid, source));
-}
+//const rustAlgorithms = async (grid: IVertex[][], source: IVertex): Promise<void> => {
+//  const algorithms = await import("algorithms");
+//  console.log(algorithms.dijkstra(grid, source));
+//}
+let NUM_ROWS: number;
+const SMALL_NUM_ROWS = 10;
+let NUM_COLUMNS: number;
 
 const App = () => {
   const lightTheme: Theme = {
@@ -31,59 +38,53 @@ const App = () => {
   };
 
   const [theme, setTheme] = useState(darkTheme);
-  const gridDimensions: IGridDimensions = {
-    rows: 25,
-    columns: 50,
-  };
 
-  const startNode = useRef<INode>(
-    {
-      weight: Math.ceil(Math.random() * 10),
-      nodeType: NodeType.start,
-      row: Math.floor(gridDimensions.rows * 0.5),
-      col: Math.floor(gridDimensions.columns * 0.25) - 1,
-      prevNode: null
-    }
-  )
 
-  const finishNode = useRef<INode>(
-    {
-      weight: Math.ceil(Math.random() * 10),
-      nodeType: NodeType.finish,
-      row: Math.floor(gridDimensions.rows * 0.5),
-      col: Math.floor(gridDimensions.columns * 0.75) - 1,
-      prevNode: null
-    }
-  )
+  const getInitialGraph = useCallback(() =>
+    useGraph(4) as GraphContextType
+    , []);
+  //rustAlgorithms(grid, startVertex.current)
 
-  const [grid, setGrid] = useState<INode[][]>((): INode[][] => {
-    let initialGrid = Array.from({ length: gridDimensions.rows }).map((_, row) =>
-      Array.from({ length: gridDimensions.columns }, (_, col): INode => ({
-        weight: Math.ceil(Math.random() * 10),
-        nodeType: NodeType.normal,
-        row: row,
-        col: col,
-        prevNode: null
-      })
-      ))
-    initialGrid[startNode.current.row][startNode.current.col] = startNode.current
-    initialGrid[finishNode.current.row][finishNode.current.col] = finishNode.current
-    return initialGrid
-  }
-  );
-  const [gridHistory, setGridHistory] = useState(grid);
+  // useLayoutEffect(() => {
+  //   function updateSize() {
+  //     setTimeout(() => {
+  //       if (window.innerHeight > 500) {
+  //         NUM_ROWS = Math.floor(window.innerHeight * 0.003) * 10;
+  //         if (NUM_ROWS === 10) NUM_ROWS = NUM_ROWS + 5;
+  //       } else {
+  //         NUM_ROWS = SMALL_NUM_ROWS;
+  //       }
+  //       NUM_COLUMNS = Math.floor(window.innerWidth * 0.003) * 10;
+  //       console.log(NUM_ROWS, NUM_COLUMNS)
+  //     }, 500);
+  //   }
+  //   window.addEventListener("resize", () => {
+  //     if (window.innerHeight > 480) updateSize();
+  //   });
+  //   updateSize();
+  //   return () =>
+  //     window.removeEventListener("resize", () => {
+  //       if (window.innerHeight > 480) updateSize();
+  //     });
+  // }, [getInitialGraph]);
 
-  rustAlgorithms(grid, startNode.current)
+  const graph = getInitialGraph()
 
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyles />
-      <GridContext.Provider value={{ grid, setGrid, gridDimensions, startNode, finishNode }}>
-        <ButtonGroup />
-        <Grid />
-      </GridContext.Provider>
+      {
+        //<GridContext.Provider value={{ grid, setGrid, gridDimensions, startNode: startVertex, finishNode: finishVertex }}>
+        //  <ButtonGroup />
+        //  <Grid />
+        //</GridContext.Provider>
+
+      }
+      <GraphContext.Provider value={graph}>
+        <Graph />
+      </GraphContext.Provider>
     </ThemeProvider>
   );
 };
 
-ReactDOM.render(<App />, document.getElementById("root") as HTMLElement);
+createRoot(document.getElementById("root") as HTMLElement).render(<App />,);

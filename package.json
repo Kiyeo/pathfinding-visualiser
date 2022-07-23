@@ -3,9 +3,10 @@
   "name": "algorithm-visualiser",
   "private": true,
   "scripts": {
+    "s": "react-app-rewired --inspect start",
     "start": "yarn run wasm-pack-build && BROWSER=none react-app-rewired start",
     "wasm-pack-build": "rm -rf node_modules/algorithms && cd ./src/algorithms && wasm-pack build && yarn install",
-    "build": "react-app-rewired build",
+    "build": "GENERATE_SOURCEMAP=true react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject"
   },
@@ -15,7 +16,8 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-scripts": "5.0.1",
-    "styled-components": "^5.3.3"
+    "styled-components": "^5.3.3",
+    "yarn": "^1.22.19"
   },
   "devDependencies": {
     "@types/node": "17.0.24",

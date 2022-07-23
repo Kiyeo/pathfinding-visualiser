@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import styled from "styled-components";
 import Button from "./Button";
 import { GridContext } from "../contexts/GridContext";
-import INode from "../@types/node";
+import INode from "../@types/vertex";
 import { GridContextType } from "../@types/gridContextType";
 
 const ButtonGroup = styled.nav``;
@@ -17,7 +17,7 @@ export default () => {
         (
           {
             ...grid[row][col],
-            weight: Math.ceil(Math.random() * 10)
+            //weight: Math.ceil(Math.random() * 10)
           }
         ))));
   }

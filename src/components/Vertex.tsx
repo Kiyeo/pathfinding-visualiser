@@ -1,12 +1,13 @@
 import React from "react";
 import styled from "styled-components";
-import NodeType from "../NodeType"
+import VertexType from "../VertexType"
 
-const Node = styled.div<{ nodeType: number }>`
+const Vertex = styled.div<{ nodeType: number }>`
   touch-action: none;
   user-select: none;
-  background-color: ${(p) => p.nodeType === NodeType.start && 'green' || p.nodeType === NodeType.finish && 'red' || 'rgb(175, 216, 248)'};
+  background-color: ${(p) => p.nodeType === VertexType.start && 'green' || p.nodeType === VertexType.finish && 'red' || 'rgb(175, 216, 248)'};
   color: ${(p) => p.theme.backgroundColor};
+  border-radius: 50%;
   cursor: pointer;
   display: flex;
   justify-content: center;
@@ -14,9 +15,9 @@ const Node = styled.div<{ nodeType: number }>`
 `;
 
 export default (props: any) => {
-  const { node, handleMouseEvent } = props;
-  return <Node
-    id={`${node.row} ${node.col}`}
+  const { id, vertex, handleMouseEvent } = props;
+  return <Vertex
+    id={`${id.rowIdx} ${id.colIdx}`}
     onPointerDown={() => handleMouseEvent()}
     onPointerUp={() => handleMouseEvent()}
     onMouseEnter={() => handleMouseEvent()}
@@ -26,5 +27,5 @@ export default (props: any) => {
       e.preventDefault();
       e.stopPropagation();
     }}
-    nodeType={node.nodeType} >{node.weight}</Node>;
+    nodeType={vertex.nodeType} >{vertex.name}</Vertex>;
 };
